@@ -528,6 +528,11 @@ async def _execute_codex_search_and_followup(
             "query": query,
         },
     }
+    ws_result_item = {
+        "type": "function_call_output",
+        "call_id": call_id,
+        "output": search_text,
+    }
 
     # Combine outputs: keep original reasoning + web_search_call + second response outputs
     merged_output = []
@@ -539,6 +544,7 @@ async def _execute_codex_search_and_followup(
 
     # Add web_search_call
     merged_output.append(ws_output_item)
+    merged_output.append(ws_result_item)
 
     # Add all output from second response (the model's final answer)
     for item in second_resp.get("output", []):
