@@ -581,9 +581,9 @@ def _responses_sse_event(data_line: str) -> Optional[dict]:
 
 
 async def _buffer_responses_stream(upstream_resp) -> bytes:
-    """Buffer the entire upstream SSE response into bytes."""
+    """Buffer the entire upstream SSE response into decoded bytes."""
     chunks = []
-    async for chunk in upstream_resp.aiter_raw():
+    async for chunk in upstream_resp.aiter_bytes():
         chunks.append(chunk)
     await upstream_resp.aclose()
     return b"".join(chunks)
