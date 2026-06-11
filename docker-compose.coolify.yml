@@ -1,0 +1,31 @@
+services:
+  gluey-proxy:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - SERVICE_URL_GLUEY-PROXY
+      - SERVICE_URL_GLUEY-PROXY_4001
+      - UPSTREAM=${UPSTREAM:?Set the upstream OpenAI/Anthropic-compatible base URL}
+      - UPSTREAM_API_KEY=${UPSTREAM_API_KEY:-}
+      - LOG_REQUESTS=${LOG_REQUESTS:-0}
+      - CODEX_SEARCH_BACKEND=${CODEX_SEARCH_BACKEND:-ollama}
+      - OLLAMA_API_KEY=${OLLAMA_API_KEY:-}
+      - OLLAMA_SEARCH_URL=${OLLAMA_SEARCH_URL:-https://ollama.com/api/web_search}
+      - TAVILY_API_KEY=${TAVILY_API_KEY:-}
+      - TAVILY_SEARCH_URL=${TAVILY_SEARCH_URL:-https://api.tavily.com/search}
+      - SEARCH_MAX_RESULTS=${SEARCH_MAX_RESULTS:-5}
+      - SEARCH_SNIPPET_LEN=${SEARCH_SNIPPET_LEN:-1500}
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:4001/docs', timeout=5)",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
