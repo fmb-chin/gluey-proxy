@@ -39,7 +39,8 @@ OLLAMA_API_KEY = os.environ.get("OLLAMA_API_KEY", "")
 SEARCH_MAX_RESULTS = int(os.environ.get("SEARCH_MAX_RESULTS", "5"))
 SEARCH_SNIPPET_LEN = int(os.environ.get("SEARCH_SNIPPET_LEN", "1500"))
 
-# Codex web_search backend: "ollama" (default) or "tavily"
+# Web search backends: "ollama" (default) or "tavily".
+CLAUDE_SEARCH_BACKEND = os.environ.get("CLAUDE_SEARCH_BACKEND", "ollama").strip().lower()
 CODEX_SEARCH_BACKEND = os.environ.get("CODEX_SEARCH_BACKEND", "ollama").strip().lower()
 TAVILY_API_KEY = os.environ.get("TAVILY_API_KEY", "")
 TAVILY_SEARCH_URL = os.environ.get("TAVILY_SEARCH_URL", "https://api.tavily.com/search")
@@ -199,11 +200,27 @@ async def run_tavily_search(query: str) -> list:
     return out
 
 
-async def run_search(query: str) -> list:
-    """Execute search via the configured backend (ollama or tavily)."""
-    if CODEX_SEARCH_BACKEND == "tavily" and TAVILY_API_KEY:
-        return await run_tavily_search(query)
-    return await run_ollama_search(query)
+SEARCH_BACKENDS = {
+    "ollama": run_ollama_search,
+    "tavily": run_tavily_search,
+}
+
+
+async def run_search(query: str, backend: Optional[str] = None) -> list:
+    """Execute search via a named backend.
+
+    Backends return a list of {"title", "url", "content"} dictionaries so the
+    client-specific web_search flows can share the same search provider layer.
+    """
+    backend_name = (backend or "ollama").strip().lower()
+    search = SEARCH_BACKENDS.get(backend_name)
+    if search is None:
+        return [{
+            "title": f"Search failed: unknown search backend '{backend_name}'",
+            "url": "",
+            "content": "",
+        }]
+    return await search(query)
 
 
 def _format_search_results_text(hits: list) -> str:
@@ -227,7 +244,7 @@ def _sse(event: str, data: dict) -> bytes:
 
 
 async def synthesize_search_sse(model: str, query: str, rid: str):
-    hits = await run_ollama_search(query)
+    hits = await run_search(query, CLAUDE_SEARCH_BACKEND)
 
     msg_id = f"msg_{uuid.uuid4().hex[:24]}"
     tool_use_id = f"srvtoolu_{uuid.uuid4().hex[:24]}"
@@ -236,7 +253,12 @@ async def synthesize_search_sse(model: str, query: str, rid: str):
 
     if LOG_REQUESTS:
         (LOG_DIR / f"{rid}.synthetic.json").write_text(
-            json.dumps({"query": query, "tool_use_id": tool_use_id, "hits": hits},
+            json.dumps({
+                "query": query,
+                "backend": CLAUDE_SEARCH_BACKEND,
+                "tool_use_id": tool_use_id,
+                "hits": hits,
+            },
                        ensure_ascii=False, indent=2)
         )
 
@@ -421,7 +443,7 @@ async def _execute_codex_search_and_followup(
 
     # Execute search
     search_started = time.time()
-    hits = await run_search(query)
+    hits = await run_search(query, CODEX_SEARCH_BACKEND)
     search_text = _format_search_results_text(hits)
 
     request_annotations["codex_web_search"] = {

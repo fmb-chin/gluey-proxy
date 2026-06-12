@@ -45,8 +45,9 @@ class FollowupClient:
 
 @pytest.mark.asyncio
 async def test_codex_web_search_merge_keeps_result_context_for_later_turns(monkeypatch):
-    async def fake_search(query):
+    async def fake_search(query, backend=None):
         assert query == "OpenAI latest model"
+        assert backend == claude_proxy.CODEX_SEARCH_BACKEND
         return [
             {
                 "title": "OpenAI model release",

@@ -27,21 +27,27 @@ Required:
 
 ```text
 UPSTREAM=http://litellm:4000
-UPSTREAM_API_KEY=<liteLLM key used by the proxy>
-OLLAMA_API_KEY=<optional, required for Ollama web search>
 ```
 
 Optional:
 
 ```text
+UPSTREAM_API_KEY=<fallback LiteLLM key used when the client does not send Authorization>
 LOG_DIR=/var/log/claude-proxy
 OLLAMA_SEARCH_URL=https://ollama.com/api/web_search
 SEARCH_MAX_RESULTS=5
 SEARCH_SNIPPET_LEN=1500
+CLAUDE_SEARCH_BACKEND=ollama
 CODEX_SEARCH_BACKEND=ollama
-TAVILY_API_KEY=<optional, used when CODEX_SEARCH_BACKEND=tavily>
+OLLAMA_API_KEY=<optional, required for Ollama web search>
+TAVILY_API_KEY=<optional, required when CLAUDE_SEARCH_BACKEND or CODEX_SEARCH_BACKEND is tavily>
 TAVILY_SEARCH_URL=https://api.tavily.com/search
 ```
+
+`CLAUDE_SEARCH_BACKEND` and `CODEX_SEARCH_BACKEND` are independent. Supported
+values are `ollama` and `tavily`; both search providers return the same internal
+`title`/`url`/`content` result shape so additional providers can be added behind
+the same adapter boundary.
 
 Do not commit real keys. Use `.env` or your deployment secret store.
 

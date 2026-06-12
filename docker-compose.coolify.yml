@@ -15,6 +15,7 @@ services:
       - UPSTREAM=${UPSTREAM:?Set the upstream OpenAI/Anthropic-compatible base URL}
       - UPSTREAM_API_KEY=${UPSTREAM_API_KEY:-}
       - LOG_REQUESTS=${LOG_REQUESTS:-0}
+      - CLAUDE_SEARCH_BACKEND=${CLAUDE_SEARCH_BACKEND:-ollama}
       - CODEX_SEARCH_BACKEND=${CODEX_SEARCH_BACKEND:-ollama}
       - OLLAMA_API_KEY=${OLLAMA_API_KEY:-}
       - OLLAMA_SEARCH_URL=${OLLAMA_SEARCH_URL:-https://ollama.com/api/web_search}
