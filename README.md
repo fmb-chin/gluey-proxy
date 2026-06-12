@@ -40,12 +40,13 @@ CLAUDE_SEARCH_BACKEND=ollama
 CODEX_SEARCH_BACKEND=ollama
 OLLAMA_API_KEY=<optional, required for Ollama web search>
 TAVILY_API_KEY=<optional, required when CLAUDE_SEARCH_BACKEND or CODEX_SEARCH_BACKEND is tavily>
+SEARXNG_BASE_URL=<optional, required when CLAUDE_SEARCH_BACKEND or CODEX_SEARCH_BACKEND is searxng>
 ```
 
 `CLAUDE_SEARCH_BACKEND` and `CODEX_SEARCH_BACKEND` are independent. Supported
-values are `ollama` and `tavily`; both search providers return the same internal
-`title`/`url`/`content` result shape so additional providers can be added behind
-the same adapter boundary.
+values are `ollama`, `tavily`, and `searxng`; all search providers return the
+same internal `title`/`url`/`content` result shape so additional providers can
+be added behind the same adapter boundary.
 
 Do not commit real keys. Use `.env` or your deployment secret store.
 

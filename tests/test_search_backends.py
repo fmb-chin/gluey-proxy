@@ -10,6 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import claude_proxy
 import gluey_proxy.claude_websearch as claude_websearch
 import gluey_proxy.codex_responses as codex_responses
+import gluey_proxy.search as search
 from claude_proxy import _execute_codex_search_and_followup, run_search, synthesize_search_sse
 
 
@@ -26,6 +27,31 @@ class FollowupClient:
         return FollowupResponse()
 
 
+class SearxngResponse:
+    def raise_for_status(self):
+        return None
+
+    def json(self):
+        return {
+            "results": [
+                {
+                    "title": "SearXNG result",
+                    "url": "https://example.test/result",
+                    "content": "Mapped from SearXNG content.",
+                }
+            ]
+        }
+
+
+class SearxngClient:
+    def __init__(self):
+        self.calls = []
+
+    async def get(self, url, **kwargs):
+        self.calls.append((url, kwargs))
+        return SearxngResponse()
+
+
 @pytest.mark.asyncio
 async def test_run_search_dispatches_to_named_backend(monkeypatch):
     async def fake_search(query):
@@ -40,6 +66,52 @@ async def test_run_search_dispatches_to_named_backend(monkeypatch):
             "title": "Fake",
             "url": "https://example.test",
             "content": "dispatch me",
+        }
+    ]
+
+
+@pytest.mark.asyncio
+async def test_searxng_backend_requires_base_url(monkeypatch):
+    monkeypatch.setattr(search, "SEARXNG_BASE_URL", "")
+
+    hits = await run_search("query", backend="searxng")
+
+    assert hits == [
+        {
+            "title": "Search failed: SEARXNG_BASE_URL is required for searxng backend",
+            "url": "",
+            "content": "",
+        }
+    ]
+
+
+@pytest.mark.asyncio
+async def test_searxng_backend_maps_json_results(monkeypatch):
+    fake_client = SearxngClient()
+    monkeypatch.setattr(search, "SEARXNG_BASE_URL", "https://searxng.example.test")
+    monkeypatch.setattr(search, "client", fake_client)
+
+    hits = await run_search("OpenAI latest model", backend="searxng")
+
+    assert fake_client.calls == [
+        (
+            "https://searxng.example.test/search",
+            {
+                "params": {
+                    "q": "OpenAI latest model",
+                    "format": "json",
+                    "language": "auto",
+                    "safesearch": 0,
+                },
+                "timeout": 30.0,
+            },
+        )
+    ]
+    assert hits == [
+        {
+            "title": "SearXNG result",
+            "url": "https://example.test/result",
+            "content": "Mapped from SearXNG content.",
         }
     ]
 

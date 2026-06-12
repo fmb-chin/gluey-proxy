@@ -24,6 +24,7 @@ CLAUDE_SEARCH_BACKEND = os.environ.get("CLAUDE_SEARCH_BACKEND", "ollama").strip(
 CODEX_SEARCH_BACKEND = os.environ.get("CODEX_SEARCH_BACKEND", "ollama").strip().lower()
 TAVILY_API_KEY = os.environ.get("TAVILY_API_KEY", "")
 TAVILY_SEARCH_URL = "https://api.tavily.com/search"
+SEARXNG_BASE_URL = os.environ.get("SEARXNG_BASE_URL", "").strip().rstrip("/")
 
 WEB_SEARCH_SYSTEM_MARKER = "You are an assistant for performing a web search tool use"
 WEB_SEARCH_QUERY_PREFIX = "Perform a web search for the query: "

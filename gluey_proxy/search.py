@@ -5,6 +5,7 @@ from .config import (
     OLLAMA_SEARCH_URL,
     SEARCH_MAX_RESULTS,
     SEARCH_SNIPPET_LEN,
+    SEARXNG_BASE_URL,
     TAVILY_API_KEY,
     TAVILY_SEARCH_URL,
 )
@@ -69,8 +70,44 @@ async def run_tavily_search(query: str) -> list:
     return out
 
 
+async def run_searxng_search(query: str) -> list:
+    if not SEARXNG_BASE_URL:
+        return [{
+            "title": "Search failed: SEARXNG_BASE_URL is required for searxng backend",
+            "url": "",
+            "content": "",
+        }]
+
+    params = {
+        "q": query,
+        "format": "json",
+        "language": "auto",
+        "safesearch": 0,
+    }
+    try:
+        r = await client.get(f"{SEARXNG_BASE_URL}/search", params=params, timeout=30.0)
+        r.raise_for_status()
+        data = r.json()
+    except Exception as e:
+        return [{"title": f"Search failed: {e}", "url": "", "content": ""}]
+
+    results = data.get("results", []) if isinstance(data, dict) else []
+    out = []
+    for item in results:
+        if not isinstance(item, dict):
+            continue
+        title = (item.get("title") or "").strip()
+        url = (item.get("url") or "").strip()
+        content = (item.get("content") or item.get("snippet") or "").strip()
+        if len(content) > SEARCH_SNIPPET_LEN:
+            content = content[:SEARCH_SNIPPET_LEN].rstrip() + "..."
+        out.append({"title": title, "url": url, "content": content})
+    return out
+
+
 SEARCH_BACKENDS = {
     "ollama": run_ollama_search,
+    "searxng": run_searxng_search,
     "tavily": run_tavily_search,
 }
 
