@@ -5,11 +5,11 @@ from typing import Any, Optional
 
 from .config import (
     CLAUDE_SEARCH_BACKEND,
-    LOG_DIR,
     LOG_REQUESTS,
     WEB_SEARCH_QUERY_PREFIX,
     WEB_SEARCH_SYSTEM_MARKER,
 )
+from .request_logging import _log_json
 from .search import run_search
 
 
@@ -84,17 +84,15 @@ async def synthesize_search_sse(model: str, query: str, rid: str):
     out_tokens = max(1, sum(len((h.get("title") or "") + (h.get("url") or "")) for h in hits) // 4)
 
     if LOG_REQUESTS:
-        (LOG_DIR / f"{rid}.synthetic.json").write_text(
-            json.dumps(
-                {
-                    "query": query,
-                    "backend": CLAUDE_SEARCH_BACKEND,
-                    "tool_use_id": tool_use_id,
-                    "hits": hits,
-                },
-                ensure_ascii=False,
-                indent=2,
-            )
+        _log_json(
+            rid,
+            "claude.synthetic",
+            {
+                "query": query,
+                "backend": CLAUDE_SEARCH_BACKEND,
+                "tool_use_id": tool_use_id,
+                "hits": hits,
+            },
         )
 
     yield _sse("message_start", {

@@ -3,8 +3,9 @@ import time
 import uuid
 from typing import Any, Optional
 
-from .config import CODEX_SEARCH_BACKEND, LOG_DIR, LOG_REQUESTS, UPSTREAM, UPSTREAM_API_KEY
+from .config import CODEX_SEARCH_BACKEND, LOG_REQUESTS, UPSTREAM, UPSTREAM_API_KEY
 from .http_client import client
+from .request_logging import _log_json
 from .search import _format_search_results_text, run_search
 
 
@@ -133,9 +134,10 @@ async def _execute_codex_search_and_followup(
     }
 
     if LOG_REQUESTS:
-        (LOG_DIR / f"{rid}.codex_search.json").write_text(
-            json.dumps({"query": query, "backend": CODEX_SEARCH_BACKEND, "hits": hits},
-                       ensure_ascii=False, indent=2)
+        _log_json(
+            rid,
+            "codex.search",
+            {"query": query, "backend": CODEX_SEARCH_BACKEND, "hits": hits},
         )
 
     call_id = ws_call.get("call_id", "functions.web_search:0")

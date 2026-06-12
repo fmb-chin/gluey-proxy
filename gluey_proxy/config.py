@@ -1,18 +1,15 @@
 import os
-from pathlib import Path
 
 
 UPSTREAM = os.environ.get("UPSTREAM", "http://litellm:4000")
 UPSTREAM_API_KEY = os.environ.get("UPSTREAM_API_KEY", "")
-LOG_DIR = Path(os.environ.get("LOG_DIR", "/var/log/claude-proxy"))
 LOG_REQUESTS = os.environ.get("LOG_REQUESTS", "1").strip().lower() not in (
     "0",
     "false",
     "no",
     "off",
 )
-if LOG_REQUESTS:
-    LOG_DIR.mkdir(parents=True, exist_ok=True)
+LOG_BODY_MAX_CHARS = int(os.environ.get("LOG_BODY_MAX_CHARS", "20000"))
 
 OLLAMA_SEARCH_URL = "https://ollama.com/api/web_search"
 OLLAMA_API_KEY = os.environ.get("OLLAMA_API_KEY", "")

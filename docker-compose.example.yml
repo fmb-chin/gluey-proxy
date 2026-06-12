@@ -6,7 +6,8 @@ services:
     environment:
       UPSTREAM: http://litellm:4000
       UPSTREAM_API_KEY: ${UPSTREAM_API_KEY}
-      LOG_DIR: /var/log/claude-proxy
+      LOG_REQUESTS: ${LOG_REQUESTS:-1}
+      LOG_BODY_MAX_CHARS: ${LOG_BODY_MAX_CHARS:-20000}
       OLLAMA_API_KEY: ${OLLAMA_API_KEY}
       CLAUDE_SEARCH_BACKEND: ollama
       CODEX_SEARCH_BACKEND: ollama
@@ -14,6 +15,4 @@ services:
       SEARXNG_BASE_URL: ${SEARXNG_BASE_URL:-}
     ports:
       - "127.0.0.1:4001:4001"
-    volumes:
-      - ./logs:/var/log/claude-proxy
     restart: unless-stopped

@@ -19,7 +19,7 @@ as `claude-proxy`.
 - Flattens Codex MCP namespace tools before sending to upstream models and
   rewrites returned tool calls so Codex can route them back to the right MCP
   server.
-- Logs request/response details under `LOG_DIR` for debugging.
+- Logs request/response details as JSON Lines on stdout when `LOG_REQUESTS=1`.
 
 ## Environment
 
@@ -33,7 +33,8 @@ Optional:
 
 ```text
 UPSTREAM_API_KEY=<fallback LiteLLM key used when the client does not send Authorization>
-LOG_DIR=/var/log/claude-proxy
+LOG_REQUESTS=1
+LOG_BODY_MAX_CHARS=20000
 SEARCH_MAX_RESULTS=5
 SEARCH_SNIPPET_LEN=1500
 CLAUDE_SEARCH_BACKEND=ollama
@@ -60,6 +61,7 @@ pip install fastapi==0.115.0 uvicorn==0.30.6 httpx==0.27.2
 export UPSTREAM=http://localhost:4000
 export UPSTREAM_API_KEY=...
 export OLLAMA_API_KEY=...
+export LOG_REQUESTS=1
 
 uvicorn claude_proxy:app --host 0.0.0.0 --port 4001 --log-level info
 ```
@@ -85,16 +87,14 @@ docker run --rm -p 4001:4001 \
   -e UPSTREAM=http://host.docker.internal:4000 \
   -e UPSTREAM_API_KEY="$UPSTREAM_API_KEY" \
   -e OLLAMA_API_KEY="$OLLAMA_API_KEY" \
-  -e LOG_DIR=/var/log/claude-proxy \
-  -v "$PWD/logs:/var/log/claude-proxy" \
+  -e LOG_REQUESTS=1 \
   gluey-proxy:local
 ```
 
 ## Production Notes
 
-Production currently uses the image name `claude-proxy:codex-mixed-test` and
-mounts logs at `/var/log/claude-proxy`. Test uses the same image with a separate
-log directory and test upstream.
+Production currently uses the image name `claude-proxy:codex-mixed-test`.
+Request debugging is emitted to stdout as JSON Lines when `LOG_REQUESTS=1`.
 
 Before changing production:
 
@@ -103,5 +103,5 @@ Before changing production:
 3. Verify Codex `/v1/responses` without tools, with web search, and with MCP.
 4. Promote the exact same image/code to production.
 
-Request logs may contain full prompts and tool outputs. Keep retention short and
-do not upload logs without redaction.
+Request logs may contain full prompts and tool outputs. Keep platform log
+retention short and do not upload logs without redaction.

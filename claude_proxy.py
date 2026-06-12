@@ -29,10 +29,10 @@ from gluey_proxy.codex_responses import (
     _is_responses_path,
     _sanitize_responses_input_for_upstream,
 )
-from gluey_proxy.config import LOG_DIR, LOG_REQUESTS, UPSTREAM
+from gluey_proxy.config import LOG_REQUESTS, UPSTREAM
 from gluey_proxy.http_client import client
 from gluey_proxy.mcp_tools import _convert_function_call_to_namespaced, _convert_mcp_calls_in_response
-from gluey_proxy.request_logging import _log_meta, _log_req
+from gluey_proxy.request_logging import _log_bytes, _log_json, _log_meta, _log_req
 from gluey_proxy.responses_sse import (
     _buffer_responses_stream,
     _build_sse_from_response,
@@ -193,13 +193,10 @@ async def proxy(full_path: str, request: Request):
             request_annotations["reasoning_downgraded"] = f"{reasoning}->high"
 
         body = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
-        # DEBUG: Save the actual body being sent upstream
         if LOG_REQUESTS:
-            (LOG_DIR / f"{rid}.upstream.body").write_bytes(body)
+            _log_bytes(rid, "upstream.body", body)
             tool_names = [t.get("name") for t in payload.get("tools", []) if isinstance(t, dict)]
-            (LOG_DIR / f"{rid}.upstream.tools.txt").write_text(
-            json.dumps(tool_names, ensure_ascii=False, indent=2)
-        )
+            _log_json(rid, "upstream.tools", tool_names)
 
     # --- Forward to upstream ---
     upstream_url = f"{UPSTREAM.rstrip('/')}/{full_path}"
@@ -243,9 +240,7 @@ async def proxy(full_path: str, request: Request):
 
     resp_headers = dict(upstream_resp.headers)
     if LOG_REQUESTS:
-        (LOG_DIR / f"{rid}.resp.headers.json").write_text(
-        json.dumps(resp_headers, ensure_ascii=False, indent=2)
-    )
+        _log_json(rid, "resp.headers", resp_headers)
 
     ctype = upstream_resp.headers.get("content-type", "")
     is_stream = "text/event-stream" in ctype or "stream" in ctype
@@ -287,7 +282,7 @@ async def proxy(full_path: str, request: Request):
         # Buffer the entire upstream response to rewrite function_call namespace
         raw_body = await _buffer_responses_stream(upstream_resp)
         if LOG_REQUESTS:
-            (LOG_DIR / f"{rid}.resp.body").write_bytes(raw_body)
+            _log_bytes(rid, "resp.body", raw_body)
 
         if is_stream:
             output_items = _parse_sse_output(raw_body)
@@ -305,9 +300,8 @@ async def proxy(full_path: str, request: Request):
                     resp_dict, mcp_namespace_map, request_annotations
                 )
                 sse_bytes = _build_sse_from_response(resp_dict)
-                # DEBUG: Save the converted response for inspection
                 if LOG_REQUESTS:
-                    (LOG_DIR / f"{rid}.resp.client.sse").write_bytes(sse_bytes)
+                    _log_bytes(rid, "resp.client.sse", sse_bytes)
                 _log_meta(rid, {
                     "rid": rid,
                     "upstream_url": upstream_url,
@@ -353,10 +347,8 @@ async def proxy(full_path: str, request: Request):
                 resp_dict = _convert_mcp_calls_in_response(
                     resp_dict, mcp_namespace_map, request_annotations
                 )
-                # DEBUG: Save the converted JSON response for inspection
-                (LOG_DIR / f"{rid}.resp.client.json").write_bytes(
-                    json.dumps(resp_dict, ensure_ascii=False, indent=2).encode("utf-8")
-                )
+                if LOG_REQUESTS:
+                    _log_json(rid, "resp.client.json", resp_dict)
                 _log_meta(rid, {
                     "rid": rid,
                     "upstream_url": upstream_url,
@@ -403,7 +395,7 @@ async def proxy(full_path: str, request: Request):
         # Buffer the entire upstream response
         raw_body = await _buffer_responses_stream(upstream_resp)
         if LOG_REQUESTS:
-            (LOG_DIR / f"{rid}.resp.body").write_bytes(raw_body)
+            _log_bytes(rid, "resp.body", raw_body)
 
         # Parse output items from the response
         first_resp = None
@@ -604,14 +596,11 @@ async def proxy(full_path: str, request: Request):
             )
 
     # --- Default: transparent stream forward (non-Codex or error responses) ---
-    resp_path = LOG_DIR / f"{rid}.resp.body" if LOG_REQUESTS else None
-
     async def streamer():
+        streamed_response_bytes = 0
         try:
             async for chunk in upstream_resp.aiter_raw():
-                if resp_path is not None:
-                    with open(resp_path, "ab") as f:
-                        f.write(chunk)
+                streamed_response_bytes += len(chunk)
                 yield chunk
         finally:
             await upstream_resp.aclose()
@@ -622,6 +611,7 @@ async def proxy(full_path: str, request: Request):
                 "status": upstream_resp.status_code,
                 "is_stream": is_stream,
                 "content_type": ctype,
+                "streamed_response_bytes": streamed_response_bytes,
                 **request_annotations,
                 "upstream_started_offset_ms": int((upstream_started - started) * 1000),
                 "elapsed_ms": int((time.time() - started) * 1000),
