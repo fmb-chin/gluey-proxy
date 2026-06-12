@@ -8,6 +8,7 @@ os.environ["LOG_REQUESTS"] = "0"
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import claude_proxy
+import gluey_proxy.codex_responses as codex_responses
 from claude_proxy import _execute_codex_search_and_followup, _sanitize_responses_input_for_upstream
 
 
@@ -47,7 +48,7 @@ class FollowupClient:
 async def test_codex_web_search_merge_keeps_result_context_for_later_turns(monkeypatch):
     async def fake_search(query, backend=None):
         assert query == "OpenAI latest model"
-        assert backend == claude_proxy.CODEX_SEARCH_BACKEND
+        assert backend == codex_responses.CODEX_SEARCH_BACKEND
         return [
             {
                 "title": "OpenAI model release",
@@ -56,8 +57,8 @@ async def test_codex_web_search_merge_keeps_result_context_for_later_turns(monke
             }
         ]
 
-    monkeypatch.setattr(claude_proxy, "run_search", fake_search)
-    monkeypatch.setattr(claude_proxy, "client", FollowupClient())
+    monkeypatch.setattr(codex_responses, "run_search", fake_search)
+    monkeypatch.setattr(codex_responses, "client", FollowupClient())
 
     first_resp = {
         "output": [

@@ -8,6 +8,8 @@ os.environ["LOG_REQUESTS"] = "0"
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import claude_proxy
+import gluey_proxy.claude_websearch as claude_websearch
+import gluey_proxy.codex_responses as codex_responses
 from claude_proxy import _execute_codex_search_and_followup, run_search, synthesize_search_sse
 
 
@@ -56,8 +58,8 @@ async def test_claude_web_search_uses_claude_backend(monkeypatch):
             }
         ]
 
-    monkeypatch.setattr(claude_proxy, "CLAUDE_SEARCH_BACKEND", "tavily")
-    monkeypatch.setattr(claude_proxy, "run_search", fake_run_search)
+    monkeypatch.setattr(claude_websearch, "CLAUDE_SEARCH_BACKEND", "tavily")
+    monkeypatch.setattr(claude_websearch, "run_search", fake_run_search)
 
     body = b"".join(
         [chunk async for chunk in synthesize_search_sse("test-model", "query", "rid")]
@@ -81,9 +83,9 @@ async def test_codex_web_search_uses_codex_backend(monkeypatch):
             }
         ]
 
-    monkeypatch.setattr(claude_proxy, "CODEX_SEARCH_BACKEND", "tavily")
-    monkeypatch.setattr(claude_proxy, "run_search", fake_run_search)
-    monkeypatch.setattr(claude_proxy, "client", FollowupClient())
+    monkeypatch.setattr(codex_responses, "CODEX_SEARCH_BACKEND", "tavily")
+    monkeypatch.setattr(codex_responses, "run_search", fake_run_search)
+    monkeypatch.setattr(codex_responses, "client", FollowupClient())
 
     first_resp = {
         "output": [

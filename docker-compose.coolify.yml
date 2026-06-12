@@ -18,9 +18,7 @@ services:
       - CLAUDE_SEARCH_BACKEND=${CLAUDE_SEARCH_BACKEND:-ollama}
       - CODEX_SEARCH_BACKEND=${CODEX_SEARCH_BACKEND:-ollama}
       - OLLAMA_API_KEY=${OLLAMA_API_KEY:-}
-      - OLLAMA_SEARCH_URL=${OLLAMA_SEARCH_URL:-https://ollama.com/api/web_search}
       - TAVILY_API_KEY=${TAVILY_API_KEY:-}
-      - TAVILY_SEARCH_URL=${TAVILY_SEARCH_URL:-https://api.tavily.com/search}
       - SEARCH_MAX_RESULTS=${SEARCH_MAX_RESULTS:-5}
       - SEARCH_SNIPPET_LEN=${SEARCH_SNIPPET_LEN:-1500}
     healthcheck:
