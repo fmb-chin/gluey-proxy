@@ -43,12 +43,19 @@ CODEX_SEARCH_BACKEND=ollama
 OLLAMA_API_KEY=<optional, required for Ollama web search>
 TAVILY_API_KEY=<optional, required when CLAUDE_SEARCH_BACKEND or CODEX_SEARCH_BACKEND is tavily>
 SEARXNG_BASE_URL=<optional, required when CLAUDE_SEARCH_BACKEND or CODEX_SEARCH_BACKEND is searxng>
+INJECT_WEBSEARCH=0
 ```
 
 `CLAUDE_SEARCH_BACKEND` and `CODEX_SEARCH_BACKEND` are independent. Supported
 values are `ollama`, `tavily`, and `searxng`; all search providers return the
 same internal `title`/`url`/`content` result shape so additional providers can
 be added behind the same adapter boundary.
+
+Set `INJECT_WEBSEARCH=1` to append a `web_search` function tool to `/v1/responses`
+requests that don't already carry one. This lets clients that never expose web
+search to the model (e.g. Kilo on a custom provider) use the proxy's search
+backend: the proxy intercepts the model's `web_search` call, runs the search,
+and folds the results into the response transparently.
 
 Do not commit real keys. Use `.env` or your deployment secret store.
 
