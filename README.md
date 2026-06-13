@@ -64,7 +64,7 @@ Do not commit real keys. Use `.env` or your deployment secret store.
 ```bash
 python -m venv .venv
 . .venv/bin/activate
-pip install fastapi==0.115.0 uvicorn==0.30.6 httpx==0.27.2
+pip install fastapi==0.115.0 uvicorn==0.30.6 httpx[zstd]==0.28.1
 
 export UPSTREAM=http://localhost:4000
 export UPSTREAM_API_KEY=...

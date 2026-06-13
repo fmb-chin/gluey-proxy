@@ -1,6 +1,6 @@
 FROM python:3.12-slim
 WORKDIR /app
-RUN pip install --no-cache-dir fastapi==0.115.0 uvicorn==0.30.6 httpx==0.27.2
+RUN pip install --no-cache-dir fastapi==0.115.0 uvicorn==0.30.6 httpx[zstd]==0.28.1
 COPY claude_proxy.py /app/claude_proxy.py
 COPY gluey_proxy /app/gluey_proxy
 EXPOSE 4001
