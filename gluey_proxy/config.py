@@ -26,6 +26,14 @@ SEARCH_SNIPPET_LEN = int(os.environ.get("SEARCH_SNIPPET_LEN", "1500"))
 CLAUDE_SEARCH_BACKEND = os.environ.get("CLAUDE_SEARCH_BACKEND", "ollama").strip().lower()
 CODEX_SEARCH_BACKEND = os.environ.get("CODEX_SEARCH_BACKEND", "ollama").strip().lower()
 
+# Priority order used when a search backend is set to "auto". The first
+# configured backend that returns results wins; failures fall back to the next.
+SEARCH_AUTO_ORDER = [
+    name.strip().lower()
+    for name in os.environ.get("SEARCH_AUTO_ORDER", "ollama,tavily,searxng").split(",")
+    if name.strip()
+]
+
 # When enabled, inject a web_search function tool into /v1/responses requests
 # that don't already carry one. Lets clients whose web search is not exposed to
 # the model (e.g. Kilo on a custom provider) use the proxy's search backend.

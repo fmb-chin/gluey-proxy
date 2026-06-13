@@ -40,6 +40,7 @@ SEARCH_MAX_RESULTS=5
 SEARCH_SNIPPET_LEN=1500
 CLAUDE_SEARCH_BACKEND=ollama
 CODEX_SEARCH_BACKEND=ollama
+SEARCH_AUTO_ORDER=ollama,tavily,searxng
 OLLAMA_API_KEY=<optional, required for Ollama web search>
 TAVILY_API_KEY=<optional, required when CLAUDE_SEARCH_BACKEND or CODEX_SEARCH_BACKEND is tavily>
 SEARXNG_BASE_URL=<optional, required when CLAUDE_SEARCH_BACKEND or CODEX_SEARCH_BACKEND is searxng>
@@ -47,9 +48,14 @@ INJECT_WEBSEARCH=0
 ```
 
 `CLAUDE_SEARCH_BACKEND` and `CODEX_SEARCH_BACKEND` are independent. Supported
-values are `ollama`, `tavily`, and `searxng`; all search providers return the
-same internal `title`/`url`/`content` result shape so additional providers can
+values are `ollama`, `tavily`, `searxng`, and `auto`; all search providers return
+the same internal `title`/`url`/`content` result shape so additional providers can
 be added behind the same adapter boundary.
+
+Set a backend to `auto` to try each provider in `SEARCH_AUTO_ORDER` (default
+`ollama,tavily,searxng`) and use the first one that returns results, falling back
+to the next when a provider errors or returns nothing. This doubles as a failover:
+the order also acts as a preferred-then-fallback chain.
 
 Set `INJECT_WEBSEARCH=1` to append a `web_search` function tool to `/v1/responses`
 requests that don't already carry one. This lets clients that never expose web

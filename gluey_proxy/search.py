@@ -3,6 +3,7 @@ from typing import Optional
 from .config import (
     OLLAMA_API_KEY,
     OLLAMA_SEARCH_URL,
+    SEARCH_AUTO_ORDER,
     SEARCH_MAX_RESULTS,
     SEARCH_SNIPPET_LEN,
     SEARXNG_BASE_URL,
@@ -112,13 +113,51 @@ SEARCH_BACKENDS = {
 }
 
 
+def _has_results(hits: list) -> bool:
+    """True if hits contains at least one real result.
+
+    Backends signal failure by returning a single sentinel hit with an empty
+    url (e.g. {"title": "Search failed: ...", "url": "", "content": ""}), so a
+    usable result is any hit carrying a url.
+    """
+    return isinstance(hits, list) and any(
+        isinstance(h, dict) and (h.get("url") or "").strip() for h in hits
+    )
+
+
+async def _run_auto_search(query: str) -> list:
+    """Try each backend in SEARCH_AUTO_ORDER, returning the first real results.
+
+    Falls back to the next backend when one errors or returns no usable hits.
+    If every backend fails, returns the last backend's (sentinel) response so
+    the caller still sees a descriptive failure.
+    """
+    last_hits = [
+        {"title": "Search failed: no search backends configured", "url": "", "content": ""}
+    ]
+    for backend_name in SEARCH_AUTO_ORDER:
+        search = SEARCH_BACKENDS.get(backend_name)
+        if search is None:
+            continue
+        hits = await search(query)
+        if _has_results(hits):
+            return hits
+        last_hits = hits
+    return last_hits
+
+
 async def run_search(query: str, backend: Optional[str] = None) -> list:
     """Execute search via a named backend.
 
     Backends return a list of {"title", "url", "content"} dictionaries so the
     client-specific web_search flows can share the same search provider layer.
+
+    A backend of "auto" tries each provider in SEARCH_AUTO_ORDER and returns the
+    first that yields results, falling back on failure.
     """
     backend_name = (backend or "ollama").strip().lower()
+    if backend_name == "auto":
+        return await _run_auto_search(query)
     search = SEARCH_BACKENDS.get(backend_name)
     if search is None:
         return [

@@ -71,6 +71,71 @@ async def test_run_search_dispatches_to_named_backend(monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_auto_search_falls_back_to_next_backend(monkeypatch):
+    calls = []
+
+    async def failing(query):
+        calls.append("first")
+        return [{"title": "Search failed: boom", "url": "", "content": ""}]
+
+    async def working(query):
+        calls.append("second")
+        return [{"title": "Good", "url": "https://ok.test", "content": query}]
+
+    monkeypatch.setitem(search.SEARCH_BACKENDS, "first", failing)
+    monkeypatch.setitem(search.SEARCH_BACKENDS, "second", working)
+    monkeypatch.setattr(search, "SEARCH_AUTO_ORDER", ["first", "second"])
+
+    hits = await run_search("auto me", backend="auto")
+
+    # First backend tried and failed, fell through to the second.
+    assert calls == ["first", "second"]
+    assert hits == [{"title": "Good", "url": "https://ok.test", "content": "auto me"}]
+
+
+@pytest.mark.asyncio
+async def test_auto_search_returns_first_successful_backend(monkeypatch):
+    calls = []
+
+    async def working(query):
+        calls.append("first")
+        return [{"title": "Good", "url": "https://ok.test", "content": query}]
+
+    async def never(query):
+        calls.append("second")
+        return [{"title": "Should not run", "url": "https://no.test", "content": ""}]
+
+    monkeypatch.setitem(search.SEARCH_BACKENDS, "first", working)
+    monkeypatch.setitem(search.SEARCH_BACKENDS, "second", never)
+    monkeypatch.setattr(search, "SEARCH_AUTO_ORDER", ["first", "second"])
+
+    hits = await run_search("auto me", backend="auto")
+
+    # First backend succeeded; second is never tried.
+    assert calls == ["first"]
+    assert hits[0]["url"] == "https://ok.test"
+
+
+@pytest.mark.asyncio
+async def test_auto_search_returns_last_failure_when_all_fail(monkeypatch):
+    async def fail_a(query):
+        return [{"title": "Search failed: a", "url": "", "content": ""}]
+
+    async def fail_b(query):
+        return [{"title": "Search failed: b", "url": "", "content": ""}]
+
+    monkeypatch.setitem(search.SEARCH_BACKENDS, "a", fail_a)
+    monkeypatch.setitem(search.SEARCH_BACKENDS, "b", fail_b)
+    monkeypatch.setattr(search, "SEARCH_AUTO_ORDER", ["a", "b"])
+
+    hits = await run_search("auto me", backend="auto")
+
+    # All failed; the last backend's failure sentinel is surfaced.
+    assert hits == [{"title": "Search failed: b", "url": "", "content": ""}]
+
+
+
+@pytest.mark.asyncio
 async def test_searxng_backend_requires_base_url(monkeypatch):
     monkeypatch.setattr(search, "SEARXNG_BASE_URL", "")
 
