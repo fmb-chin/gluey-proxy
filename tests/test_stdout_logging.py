@@ -11,6 +11,7 @@ import gluey_proxy.request_logging as request_logging
 
 def test_request_debug_logs_are_emitted_to_stdout(monkeypatch, capsys):
     monkeypatch.setattr(request_logging, "LOG_REQUESTS", True)
+    monkeypatch.setattr(request_logging, "LOG_BODY_TO_STDOUT", True)
     monkeypatch.setattr(request_logging, "LOG_BODY_MAX_CHARS", 10)
 
     body = json.dumps(
@@ -36,3 +37,22 @@ def test_request_debug_logs_are_emitted_to_stdout(monkeypatch, capsys):
     assert lines[1]["truncated"] is True
     assert lines[2]["data"]["tools"] == [{"type": "web_search"}]
     assert lines[3]["codex_web_search_converted"] is True
+
+
+def test_body_debug_logs_can_be_disabled(monkeypatch, capsys):
+    monkeypatch.setattr(request_logging, "LOG_REQUESTS", True)
+    monkeypatch.setattr(request_logging, "LOG_BODY_TO_STDOUT", False)
+
+    body = json.dumps({"model": "test-model"}).encode("utf-8")
+
+    request_logging._log_req("rid-2", {"user-agent": "test"}, body)
+    request_logging._log_meta("rid-2", {"ok": True})
+
+    lines = [json.loads(line) for line in capsys.readouterr().out.splitlines()]
+
+    assert [line["event"] for line in lines] == [
+        "gluey_proxy.req.headers",
+        "gluey_proxy.meta",
+    ]
+    assert lines[0]["data"] == {"user-agent": "test"}
+    assert lines[1]["ok"] is True

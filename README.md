@@ -34,6 +34,7 @@ Optional:
 ```text
 UPSTREAM_API_KEY=<fallback LiteLLM key used when the client does not send Authorization>
 LOG_REQUESTS=1
+LOG_BODY_TO_STDOUT=1
 LOG_BODY_MAX_CHARS=20000
 SEARCH_MAX_RESULTS=5
 SEARCH_SNIPPET_LEN=1500
@@ -62,6 +63,7 @@ export UPSTREAM=http://localhost:4000
 export UPSTREAM_API_KEY=...
 export OLLAMA_API_KEY=...
 export LOG_REQUESTS=1
+export LOG_BODY_TO_STDOUT=1
 
 uvicorn claude_proxy:app --host 0.0.0.0 --port 4001 --log-level info
 ```
@@ -88,6 +90,7 @@ docker run --rm -p 4001:4001 \
   -e UPSTREAM_API_KEY="$UPSTREAM_API_KEY" \
   -e OLLAMA_API_KEY="$OLLAMA_API_KEY" \
   -e LOG_REQUESTS=1 \
+  -e LOG_BODY_TO_STDOUT=1 \
   gluey-proxy:local
 ```
 
@@ -95,6 +98,8 @@ docker run --rm -p 4001:4001 \
 
 Production currently uses the image name `claude-proxy:codex-mixed-test`.
 Request debugging is emitted to stdout as JSON Lines when `LOG_REQUESTS=1`.
+Set `LOG_BODY_TO_STDOUT=0` to keep request/response body payloads out of
+stdout while preserving headers and metadata logs.
 
 Before changing production:
 

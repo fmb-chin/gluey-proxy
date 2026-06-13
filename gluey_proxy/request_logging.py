@@ -1,6 +1,6 @@
 import json
 
-from .config import LOG_BODY_MAX_CHARS, LOG_REQUESTS
+from .config import LOG_BODY_MAX_CHARS, LOG_BODY_TO_STDOUT, LOG_REQUESTS
 
 
 def _emit(event: str, rid: str, payload: dict) -> None:
@@ -28,6 +28,8 @@ def _log_json(rid: str, name: str, data) -> None:
 
 
 def _log_text(rid: str, name: str, text: str) -> None:
+    if not LOG_BODY_TO_STDOUT:
+        return
     char_length = len(text)
     truncated = len(text) > LOG_BODY_MAX_CHARS
     if truncated:
@@ -36,6 +38,8 @@ def _log_text(rid: str, name: str, text: str) -> None:
 
 
 def _log_bytes(rid: str, name: str, body: bytes) -> None:
+    if not LOG_BODY_TO_STDOUT:
+        return
     _emit(name, rid, _preview_bytes(body))
 
 
@@ -44,6 +48,8 @@ def _log_req(rid: str, headers: dict, body: bytes) -> None:
         return
     _log_json(rid, "req.headers", headers)
     _log_bytes(rid, "req.body", body)
+    if not LOG_BODY_TO_STDOUT:
+        return
     try:
         parsed = json.loads(body) if body else None
         if parsed is not None:

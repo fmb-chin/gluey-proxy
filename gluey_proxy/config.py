@@ -9,6 +9,12 @@ LOG_REQUESTS = os.environ.get("LOG_REQUESTS", "1").strip().lower() not in (
     "no",
     "off",
 )
+LOG_BODY_TO_STDOUT = os.environ.get("LOG_BODY_TO_STDOUT", "1").strip().lower() not in (
+    "0",
+    "false",
+    "no",
+    "off",
+)
 LOG_BODY_MAX_CHARS = int(os.environ.get("LOG_BODY_MAX_CHARS", "20000"))
 
 OLLAMA_SEARCH_URL = "https://ollama.com/api/web_search"
