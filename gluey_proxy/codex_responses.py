@@ -55,6 +55,17 @@ def _sanitize_responses_input_for_upstream(input_items: Any, request_annotations
     """
     if not isinstance(input_items, list):
         return input_items
+    # Collect call_ids that already have a paired function_call. A function_call_output
+    # whose call_id has no matching call makes upstream reject the request with
+    # "tool id not found". This happens with web_search histories: the intercept path
+    # surfaces a function_call_output (the search result) without the originating
+    # function_call. We synthesize the missing call so the pair is self-consistent
+    # for upstream while preserving the search context for the model.
+    function_call_ids = {
+        item.get("call_id")
+        for item in input_items
+        if isinstance(item, dict) and item.get("type") == "function_call" and item.get("call_id")
+    }
     sanitized = []
     stripped = {}
     for item in input_items:
@@ -98,6 +109,21 @@ def _sanitize_responses_input_for_upstream(input_items: Any, request_annotations
         if item_type in ("tool_search_call", "tool_search_output"):
             stripped[item_type] = stripped.get(item_type, 0) + 1
             continue
+        if item_type == "function_call_output":
+            call_id = item.get("call_id")
+            if call_id and call_id not in function_call_ids:
+                # Synthesize the missing function_call so upstream sees a complete
+                # tool round-trip instead of an orphaned result.
+                sanitized.append({
+                    "type": "function_call",
+                    "call_id": call_id,
+                    "name": "web_search",
+                    "arguments": "{}",
+                })
+                function_call_ids.add(call_id)
+                request_annotations["synthesized_function_call"] = (
+                    request_annotations.get("synthesized_function_call", 0) + 1
+                )
         sanitized.append(item)
     if stripped:
         request_annotations["codex_input_items_stripped"] = stripped
@@ -231,8 +257,15 @@ async def _execute_codex_search_and_followup(
         if item.get("type") == "reasoning":
             merged_output.append(item)
 
-    merged_output.append(ws_output_item)
-    merged_output.append(ws_result_item)
+    # For the injected path (clients like Kilo that never registered web_search),
+    # do NOT surface the web_search_call / function_call_output round-trip. The
+    # client doesn't know this tool and would (a) flag it as an invalid tool call
+    # mid-stream and (b) echo the dangling function_call_output back next turn,
+    # which upstream rejects ("tool id not found"). The search results are already
+    # folded into the follow-up message, so a clean message is all the client needs.
+    if not request_annotations.get("web_search_injected"):
+        merged_output.append(ws_output_item)
+        merged_output.append(ws_result_item)
 
     for item in second_resp.get("output", []):
         merged_output.append(item)

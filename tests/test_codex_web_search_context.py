@@ -99,3 +99,37 @@ async def test_codex_web_search_merge_keeps_result_context_for_later_turns(monke
         and "GPT-5.5 was released" in item.get("output", "")
         for item in next_turn_input
     )
+
+
+def test_sanitize_synthesizes_missing_function_call_for_orphan_output():
+    # A history carrying a function_call_output without a paired function_call
+    # (as produced by the web_search intercept) must not be sent to upstream
+    # bare: upstream rejects it with "tool id not found". The sanitizer should
+    # synthesize the missing function_call so the pair is self-consistent.
+    history = [
+        {"role": "user", "content": "search please"},
+        {"type": "function_call_output", "call_id": "call_orphan_1", "output": "result text"},
+    ]
+
+    sanitized = _sanitize_responses_input_for_upstream(history, {})
+
+    calls = [i for i in sanitized if i.get("type") == "function_call" and i.get("call_id") == "call_orphan_1"]
+    outputs = [i for i in sanitized if i.get("type") == "function_call_output" and i.get("call_id") == "call_orphan_1"]
+    assert len(calls) == 1
+    assert len(outputs) == 1
+    # The synthesized call must come before its output.
+    assert sanitized.index(calls[0]) < sanitized.index(outputs[0])
+
+
+def test_sanitize_leaves_paired_function_call_output_untouched():
+    history = [
+        {"type": "function_call", "call_id": "c1", "name": "web_search", "arguments": "{}"},
+        {"type": "function_call_output", "call_id": "c1", "output": "result"},
+    ]
+
+    sanitized = _sanitize_responses_input_for_upstream(history, {})
+
+    # No extra synthesized call; the pair passes through unchanged.
+    calls = [i for i in sanitized if i.get("type") == "function_call" and i.get("call_id") == "c1"]
+    assert len(calls) == 1
+
