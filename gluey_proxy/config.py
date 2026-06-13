@@ -25,6 +25,17 @@ SEARCH_SNIPPET_LEN = int(os.environ.get("SEARCH_SNIPPET_LEN", "1500"))
 # Web search backends: "ollama" (default) or "tavily".
 CLAUDE_SEARCH_BACKEND = os.environ.get("CLAUDE_SEARCH_BACKEND", "ollama").strip().lower()
 CODEX_SEARCH_BACKEND = os.environ.get("CODEX_SEARCH_BACKEND", "ollama").strip().lower()
+
+# When enabled, inject a web_search function tool into /v1/responses requests
+# that don't already carry one. Lets clients whose web search is not exposed to
+# the model (e.g. Kilo on a custom provider) use the proxy's search backend.
+INJECT_WEBSEARCH = os.environ.get("INJECT_WEBSEARCH", "0").strip().lower() not in (
+    "0",
+    "false",
+    "no",
+    "off",
+    "",
+)
 TAVILY_API_KEY = os.environ.get("TAVILY_API_KEY", "")
 TAVILY_SEARCH_URL = "https://api.tavily.com/search"
 SEARXNG_BASE_URL = os.environ.get("SEARXNG_BASE_URL", "").strip().rstrip("/")

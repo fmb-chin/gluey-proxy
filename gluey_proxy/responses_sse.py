@@ -45,23 +45,98 @@ def _parse_sse_output(raw: bytes) -> list:
 
 
 def _build_sse_from_response(resp: dict) -> bytes:
-    """Convert a complete response dict into SSE stream bytes."""
+    """Convert a complete response dict into a faithful Responses SSE stream.
+
+    Replicates the upstream event ordering and field shapes so that strict
+    clients (e.g. the Vercel AI SDK's Responses parser used by Kilo) can
+    reconstruct assistant text and tool calls. Message items emit the full
+    output_text.delta sequence; function_call items emit their arguments delta.
+    """
     parts = []
+    seq = 0
 
-    # response.created
-    parts.append(f"data: {json.dumps({'type': 'response.created', 'response': resp}, ensure_ascii=False)}\n\n")
+    def emit(event: dict) -> None:
+        nonlocal seq
+        event["sequence_number"] = seq
+        seq += 1
+        parts.append(f"data: {json.dumps(event, ensure_ascii=False)}\n\n")
 
-    # output items
-    for i, item in enumerate(resp.get("output", [])):
-        parts.append(f"data: {json.dumps({'type': 'response.output_item.added', 'output_index': i, 'item': item}, ensure_ascii=False)}\n\n")
-        parts.append(f"data: {json.dumps({'type': 'response.output_item.done', 'output_index': i, 'item': item}, ensure_ascii=False)}\n\n")
+    emit({"type": "response.created", "response": resp})
+    emit({"type": "response.in_progress", "response": resp})
 
-    # in_progress
-    parts.append(f"data: {json.dumps({'type': 'response.in_progress', 'response': resp}, ensure_ascii=False)}\n\n")
+    for index, item in enumerate(resp.get("output", [])):
+        item_type = item.get("type")
+        item_id = item.get("id", "")
 
-    # completed
-    parts.append(f"data: {json.dumps({'type': 'response.completed', 'response': resp}, ensure_ascii=False)}\n\n")
+        # output_item.added carries the item in its in-progress shape.
+        added_item = dict(item)
+        if item_type == "message":
+            added_item["status"] = "in_progress"
+            added_item["content"] = []
+        emit({
+            "type": "response.output_item.added",
+            "output_index": index,
+            "item": added_item,
+        })
 
+        if item_type == "message":
+            for content_index, block in enumerate(item.get("content", [])):
+                if block.get("type") != "output_text":
+                    continue
+                text = block.get("text", "")
+                annotations = block.get("annotations", [])
+                emit({
+                    "type": "response.content_part.added",
+                    "item_id": item_id,
+                    "output_index": index,
+                    "content_index": content_index,
+                    "part": {"type": "output_text", "text": "", "annotations": []},
+                })
+                if text:
+                    emit({
+                        "type": "response.output_text.delta",
+                        "item_id": item_id,
+                        "output_index": index,
+                        "content_index": content_index,
+                        "delta": text,
+                    })
+                emit({
+                    "type": "response.output_text.done",
+                    "item_id": item_id,
+                    "output_index": index,
+                    "content_index": content_index,
+                    "text": text,
+                })
+                emit({
+                    "type": "response.content_part.done",
+                    "item_id": item_id,
+                    "output_index": index,
+                    "content_index": content_index,
+                    "part": {"type": "output_text", "text": text, "annotations": annotations},
+                })
+        elif item_type == "function_call":
+            arguments = item.get("arguments", "")
+            if arguments:
+                emit({
+                    "type": "response.function_call_arguments.delta",
+                    "item_id": item_id,
+                    "output_index": index,
+                    "delta": arguments,
+                })
+            emit({
+                "type": "response.function_call_arguments.done",
+                "item_id": item_id,
+                "output_index": index,
+                "arguments": arguments,
+            })
+
+        emit({
+            "type": "response.output_item.done",
+            "output_index": index,
+            "item": item,
+        })
+
+    emit({"type": "response.completed", "response": resp})
     parts.append("data: [DONE]\n\n")
 
     return "".join(parts).encode("utf-8")

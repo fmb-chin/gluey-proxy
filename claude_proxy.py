@@ -29,7 +29,7 @@ from gluey_proxy.codex_responses import (
     _is_responses_path,
     _sanitize_responses_input_for_upstream,
 )
-from gluey_proxy.config import LOG_REQUESTS, UPSTREAM
+from gluey_proxy.config import INJECT_WEBSEARCH, LOG_REQUESTS, UPSTREAM
 from gluey_proxy.http_client import client
 from gluey_proxy.mcp_tools import _convert_function_call_to_namespaced, _convert_mcp_calls_in_response
 from gluey_proxy.request_logging import _log_bytes, _log_json, _log_meta, _log_req
@@ -48,6 +48,23 @@ from gluey_proxy.search import (
 
 
 app = FastAPI()
+
+
+WEB_SEARCH_TOOL = {
+    "type": "function",
+    "name": "web_search",
+    "description": "Search the web for current information. Use this tool whenever you need up-to-date information, news, or facts beyond your training data.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "query": {
+                "type": "string",
+                "description": "The search query string",
+            }
+        },
+        "required": ["query"],
+    },
+}
 
 
 # ---------------------- proxy core ----------------------
@@ -157,25 +174,28 @@ async def proxy(full_path: str, request: Request):
                 elif ttype == "web_search":
                     # Convert to a standard function tool so the model knows how to call it
                     has_web_search = True
-                    new_tools.append({
-                        "type": "function",
-                        "name": "web_search",
-                        "description": "Search the web for current information. Use this tool whenever you need up-to-date information, news, or facts beyond your training data.",
-                        "parameters": {
-                            "type": "object",
-                            "properties": {
-                                "query": {
-                                    "type": "string",
-                                    "description": "The search query string"
-                                }
-                            },
-                            "required": ["query"]
-                        }
-                    })
+                    new_tools.append(dict(WEB_SEARCH_TOOL))
                     request_annotations["codex_web_search_converted"] = True
                 else:
                     new_tools.append(t)
             payload["tools"] = new_tools
+
+        # Inject a web_search tool for clients that never expose one to the model
+        # (e.g. Kilo on a custom provider). Only for /v1/responses, and only when
+        # the request doesn't already carry web_search.
+        if (
+            INJECT_WEBSEARCH
+            and is_codex_responses
+            and not has_web_search
+        ):
+            tools = payload.get("tools")
+            if not isinstance(tools, list):
+                tools = []
+            tools.append(dict(WEB_SEARCH_TOOL))
+            payload["tools"] = tools
+            has_web_search = True
+            request_annotations["web_search_injected"] = True
+
 
         # Strip Responses output-only items that are not valid input for Ollama/LiteLLM.
         if is_codex_responses and isinstance(payload.get("input"), list):
