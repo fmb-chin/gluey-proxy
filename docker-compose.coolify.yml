@@ -41,9 +41,9 @@ services:
     restart: unless-stopped
 
   docs:
-    image: nginx:alpine
-    volumes:
-      - ./docs:/usr/share/nginx/html:ro
+    build:
+      context: .
+      dockerfile: Dockerfile.docs
     environment:
       - SERVICE_URL_DOCS_80
     healthcheck:
