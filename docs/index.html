@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LiteLLM & Web Search Setup Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --fm-teal: #00B5AD;
+    --fm-teal-dark: #008682;
+    --fm-teal-light: #e0f7f6;
+    --fm-blue: #1B9BC2;
+    --fm-coral: #EE6969;
+    --fm-dark: #444444;
+    --fm-navy: #31404E;
+    --fm-deep: #1D262F;
+    --fm-muted: #A2A4A4;
+    --fm-border: #E5E7E9;
+    --fm-bg: #FFFFFF;
+    --fm-surface: #F8FAFB;
+    --fm-code-bg: #1E2A35;
+    --fm-code-text: #E2E8F0;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.04);
+    --shadow-lg: 0 12px 32px rgba(0,0,0,0.08), 0 4px 8px rgba(0,0,0,0.04);
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+  body {
+    font-family: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 300;
+    color: var(--fm-dark);
+    background: var(--fm-bg);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* === Progress bar === */
+  .progress-bar {
+    position: fixed; top: 0; left: 0; width: 0%; height: 3px;
+    background: linear-gradient(90deg, var(--fm-teal), var(--fm-blue));
+    z-index: 200; transition: width 0.3s ease;
+  }
+
+  /* === Hero === */
+  .hero {
+    background: linear-gradient(160deg, var(--fm-deep) 0%, var(--fm-navy) 50%, var(--fm-teal-dark) 100%);
+    color: white; padding: 80px 24px 72px; position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; top: -30%; right: -15%;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(0,181,173,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: ''; position: absolute; bottom: -20%; left: -10%;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(27,155,194,0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-inner {
+    max-width: 780px; margin: 0 auto; position: relative; z-index: 1;
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+  }
+  .hero-logo { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 32px; }
+  .hero-logo-img { height: 44px; display: block; }
+  .hero-logo .wordmark {
+    font-weight: 900; font-size: 26px; letter-spacing: -0.02em; color: #fff; line-height: 1;
+  }
+  .hero-logo .wordmark span { color: var(--fm-teal); }
+  .hero .badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.18);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    color: rgba(255,255,255,0.9); padding: 6px 18px; border-radius: 100px;
+    font-size: 12px; font-weight: 700; line-height: 1; letter-spacing: 1.2px;
+    text-transform: uppercase; margin-bottom: 28px;
+  }
+  .hero h1 {
+    font-size: clamp(1.75rem, 4vw, 2.75rem); font-weight: 900; line-height: 1.15;
+    margin-bottom: 18px; letter-spacing: -0.02em;
+  }
+  .hero h1 span { color: var(--fm-teal); }
+  .hero p {
+    font-size: 1.1rem; font-weight: 300; color: rgba(255,255,255,0.8);
+    max-width: 520px; margin: 0 auto; line-height: 1.6;
+  }
+
+  /* === Top bar === */
+  .top-bar {
+    border-bottom: 1px solid var(--fm-border); position: sticky; top: 0; z-index: 100;
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    background: rgba(255,255,255,0.92);
+  }
+  .top-bar .container {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    max-width: 1120px; padding-top: 10px; padding-bottom: 10px;
+    overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none;
+  }
+  .top-bar .container::-webkit-scrollbar { display: none; }
+  .top-bar a {
+    white-space: nowrap; padding: 6px 14px; border-radius: 100px;
+    font-size: 13px; font-weight: 400; color: var(--fm-muted);
+    text-decoration: none; transition: all 0.2s ease; border: 1px solid transparent;
+  }
+  .top-bar a:hover { background: var(--fm-teal-light); color: var(--fm-teal-dark); border-color: rgba(0,181,173,0.15); }
+  .top-bar a.active { background: var(--fm-teal); color: white; font-weight: 700; }
+
+  /* === Container / section === */
+  .container { max-width: 820px; margin: 0 auto; padding: 0 24px; }
+  .section { padding: 56px 0; }
+  .section + .section { border-top: 1px solid var(--fm-border); }
+
+  /* === Step header === */
+  .step-header { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
+  .step-number {
+    width: 48px; height: 48px;
+    background: linear-gradient(135deg, var(--fm-teal), var(--fm-teal-dark));
+    color: white; border-radius: 14px; display: flex; align-items: center;
+    justify-content: center; font-weight: 900; font-size: 1.15rem; flex-shrink: 0;
+    box-shadow: 0 4px 14px rgba(0,181,173,0.25);
+  }
+  .step-header h2 { font-size: 1.45rem; font-weight: 700; color: var(--fm-dark); letter-spacing: -0.01em; }
+  .section-title { font-size: 1.45rem; font-weight: 700; color: var(--fm-dark); margin-bottom: 24px; letter-spacing: -0.01em; }
+
+  /* === Card === */
+  .card {
+    background: var(--fm-bg); border: 1px solid var(--fm-border);
+    border-radius: var(--radius-lg); padding: 32px; margin-bottom: 20px;
+    box-shadow: var(--shadow-sm); transition: box-shadow 0.25s ease, transform 0.25s ease;
+  }
+  .card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+  .card h3 { font-size: 1.1rem; font-weight: 700; color: var(--fm-dark); margin-bottom: 14px; }
+  .card h3.spaced { margin-top: 26px; }
+  .card p { color: #6B7280; margin-bottom: 14px; font-weight: 300; }
+  .card p:last-child { margin-bottom: 0; }
+
+  /* === Info / warn boxes === */
+  .info-box {
+    background: var(--fm-teal-light); border: 1px solid rgba(0,181,173,0.15);
+    border-radius: var(--radius-md); padding: 18px 22px; margin: 22px 0;
+    font-size: 0.95rem; color: var(--fm-teal-dark); font-weight: 400;
+    display: flex; align-items: flex-start; gap: 12px;
+  }
+  .info-box::before {
+    content: 'i'; display: flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; min-width: 22px; background: var(--fm-teal);
+    color: white; border-radius: 50%; font-size: 13px; font-weight: 700;
+    font-style: italic; margin-top: 1px;
+  }
+  .warn-box {
+    background: #FFF7F7; border: 1px solid rgba(238,105,105,0.15);
+    border-radius: var(--radius-md); padding: 18px 22px; margin: 22px 0;
+    font-size: 0.95rem; color: #B91C1C; font-weight: 400;
+    display: flex; align-items: flex-start; gap: 12px;
+  }
+  .warn-box::before {
+    content: '!'; display: flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; min-width: 22px; background: var(--fm-coral);
+    color: white; border-radius: 50%; font-size: 13px; font-weight: 900; margin-top: 1px;
+  }
+  .info-box b, .warn-box b { font-weight: 700; }
+
+  /* === Code block === */
+  .code-block {
+    background: var(--fm-code-bg); border-radius: var(--radius-md);
+    overflow: hidden; margin: 18px 0; box-shadow: var(--shadow-md);
+  }
+  .code-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 18px; background: rgba(255,255,255,0.04);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .code-header > span {
+    color: rgba(255,255,255,0.45); font-size: 12px; font-weight: 700;
+    letter-spacing: 0.8px; text-transform: uppercase;
+    flex: 1; margin-left: 14px;
+  }
+  .code-dots { display: flex; gap: 7px; }
+  .code-dots i { width: 11px; height: 11px; border-radius: 50%; display: block; }
+  .code-dots i:nth-child(1) { background: #FF5F57; }
+  .code-dots i:nth-child(2) { background: #FEBC2E; }
+  .code-dots i:nth-child(3) { background: #28C840; }
+  .code-block pre {
+    padding: 22px; overflow-x: auto;
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+    font-size: 13px; line-height: 1.85; color: var(--fm-code-text); margin: 0;
+  }
+  .code-block code { font-family: inherit; }
+
+  /* === Copy button === */
+  .copy-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.6); padding: 4px 12px; border-radius: 6px;
+    font-size: 12px; font-weight: 400; cursor: pointer; transition: all 0.2s;
+    font-family: inherit;
+  }
+  .copy-btn:hover { background: rgba(255,255,255,0.14); color: rgba(255,255,255,0.9); }
+  .copy-btn.copied { background: rgba(0,181,173,0.2); color: var(--fm-teal); border-color: rgba(0,181,173,0.3); }
+  .copy-btn svg { width: 14px; height: 14px; }
+
+  /* === Screenshot placeholder === */
+  .screenshot {
+    border: 1px solid var(--fm-border); border-radius: var(--radius-md);
+    overflow: hidden; margin: 22px 0; box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.25s ease;
+  }
+  .screenshot:hover { box-shadow: var(--shadow-md); }
+  .screenshot img { width: 100%; display: block; }
+  .screenshot .placeholder {
+    width: 100%; aspect-ratio: 16 / 8; background:
+      repeating-linear-gradient(45deg, #f0f3f5, #f0f3f5 12px, #e9eef1 12px, #e9eef1 24px);
+    display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px;
+    color: var(--fm-muted);
+  }
+  .screenshot .placeholder svg { width: 36px; height: 36px; opacity: 0.5; }
+  .screenshot .placeholder span { font-size: 13px; font-weight: 400; }
+  .screenshot-caption {
+    background: var(--fm-surface); padding: 12px 18px; font-size: 13px;
+    color: var(--fm-muted); text-align: center; border-top: 1px solid var(--fm-border); font-weight: 400;
+  }
+
+  /* === Steps list === */
+  .steps-list { list-style: none; counter-reset: step; }
+  .steps-list li {
+    counter-increment: step; padding: 14px 0 14px 48px; position: relative;
+    color: #6B7280; font-size: 0.95rem; font-weight: 300;
+  }
+  .steps-list li::before {
+    content: counter(step); position: absolute; left: 0; top: 12px;
+    width: 30px; height: 30px; background: var(--fm-teal-light);
+    border: 2px solid var(--fm-teal); border-radius: 50%; display: flex;
+    align-items: center; justify-content: center; font-size: 12px; font-weight: 700;
+    color: var(--fm-teal-dark);
+  }
+  .steps-list li strong { color: var(--fm-dark); font-weight: 700; }
+
+  ul.bullets { padding-left: 20px; margin: 10px 0; }
+  ul.bullets li { color: #6B7280; margin: 6px 0; }
+  ul.bullets li strong { color: var(--fm-dark); font-weight: 700; }
+
+  /* === Inline code === */
+  code.inline {
+    background: var(--fm-teal-light); padding: 2px 9px; border-radius: 5px;
+    font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.87em;
+    color: var(--fm-teal-dark); font-weight: 400; border: 1px solid rgba(0,181,173,0.12);
+  }
+  code.ph {
+    background: #fff0f5; padding: 2px 9px; border-radius: 5px;
+    font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.87em;
+    color: #b5326b; font-weight: 700; border: 1px solid rgba(181,50,107,0.15);
+  }
+
+  /* === Table === */
+  .table-wrap {
+    overflow-x: auto; margin: 22px 0; border-radius: var(--radius-md);
+    border: 1px solid var(--fm-border); box-shadow: var(--shadow-sm);
+  }
+  table { width: 100%; border-collapse: collapse; background: var(--fm-bg); }
+  thead th {
+    background: var(--fm-deep); color: white; padding: 16px 22px; text-align: left;
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
+  }
+  thead th:first-child { border-radius: var(--radius-md) 0 0 0; }
+  thead th:last-child { border-radius: 0 var(--radius-md) 0 0; }
+  tbody td { padding: 16px 22px; border-bottom: 1px solid var(--fm-border); font-size: 0.93rem; font-weight: 300; vertical-align: top; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: var(--fm-surface); }
+  tbody td code {
+    background: var(--fm-surface); padding: 3px 8px; border-radius: 4px;
+    font-family: 'SF Mono', monospace; font-size: 0.85em; border: 1px solid var(--fm-border);
+    color: var(--fm-teal-dark); word-break: break-all;
+  }
+  .addr-pill {
+    display: inline-block; background: var(--fm-teal); color: white;
+    padding: 2px 11px; border-radius: 6px; font-weight: 700;
+    font-family: 'SF Mono', monospace; font-size: 0.82em; margin-right: 4px;
+  }
+
+  /* === FAQ === */
+  .faq-list { display: grid; gap: 22px; }
+  .faq-item { padding-bottom: 22px; border-bottom: 1px solid var(--fm-border); }
+  .faq-item:last-child { padding-bottom: 0; border-bottom: none; }
+  .faq-question { font-size: 1rem; font-weight: 700; color: var(--fm-dark); margin-bottom: 8px; }
+  .faq-item p { color: #6B7280; margin-bottom: 0; font-weight: 300; }
+
+  a { color: var(--fm-teal-dark); text-decoration: none; font-weight: 400; }
+  a:hover { color: var(--fm-teal); }
+
+  /* === Footer === */
+  .footer {
+    background: var(--fm-deep); color: rgba(255,255,255,0.5); text-align: center;
+    padding: 48px 24px; margin-top: 48px; font-size: 0.88rem; font-weight: 300;
+  }
+  .footer strong { color: white; font-weight: 700; }
+  .footer .wordmark { font-weight: 900; font-size: 20px; color: #fff; letter-spacing: -0.02em; }
+  .footer-logo-img { height: 30px; display: block; margin: 0 auto; opacity: 0.85; }
+  .footer .wordmark span { color: var(--fm-teal); }
+  .footer-divider { width: 40px; height: 2px; background: var(--fm-teal); margin: 16px auto; border-radius: 2px; }
+
+  @media (max-width: 640px) {
+    .hero { padding: 56px 20px 48px; }
+    .card { padding: 22px; }
+    .step-header h2 { font-size: 1.2rem; }
+    .step-number { width: 40px; height: 40px; font-size: 1rem; }
+    .section { padding: 40px 0; }
+  }
+  @media print {
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .progress-bar, .top-bar, .hero::before, .hero::after { display: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="hero-logo">
+      <img class="hero-logo-img" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMiIgZGF0YS1uYW1lPSJMYXllciAyIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDg3Ljc3IDQxNC42OSI+CiAgPGRlZnM+CiAgICA8c3R5bGU+CiAgICAgIC5jbHMtMSB7CiAgICAgICAgZmlsbDogI2ZmZjsKICAgICAgfQoKICAgICAgLmNscy0yIHsKICAgICAgICBmaWxsOiAjMDBiNWFkOwogICAgICB9CiAgICA8L3N0eWxlPgogIDwvZGVmcz4KICA8ZyBpZD0iTGF5ZXJfMS0yIiBkYXRhLW5hbWU9IkxheWVyIDEiPgogICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMTI3LjYyLDczLjM0YzEwLjEzLDAsMTguMjMsOC4xMSwxOC4yMywxOC4yNHYxMy42N2MwLDEwLjEzLTguMTEsMTguMjMtMTguMjMsMTguMjNINTAuNjR2OTUuMjJoNTYuNzJjMTAuMTQsMCwxOC4yNCw4LjEsMTguMjQsMTguMjN2MTMuNjdjMCwxMC4xMi04LjEsMTguMjItMTguMjQsMTguMjJoLTU2LjcydjEyNy42NGMwLDEwLjExLTguNiwxOC4yMi0xOC4yMywxOC4yMmgtMTQuMThjLTEwLjEzLDAtMTguMjMtOC4xMS0xOC4yMy0xOC4yMlY5MS41OGMwLTEwLjEzLDguMS0xOC4yNCwxOC4yMy0xOC4yNGgxMDkuMzlaIi8+CiAgICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0zMTAuMTEsNzMuMzRjMTAuMTMsMCwxOC4yMyw4LjExLDE4LjIzLDE4LjI0djEzLjY3YzAsMTAuMTMtOC4xLDE4LjIzLTE4LjIzLDE4LjIzaC03Ny40OHY5NS4yMmg2My44MWMxMC4xMywwLDE4LjIzLDguMSwxOC4yMywxOC4yM3YxMy42N2MwLDEwLjEyLTguMSwxOC4yMi0xOC4yMywxOC4yMmgtNjMuODF2OTUuNzJoNzcuNDljMTAuMTIsMCwxOC4yMyw4LjEsMTguMjMsMTguMjN2MTMuNjhjMCwxMC4xMS04LjEsMTguMjItMTguMjMsMTguMjJoLTEwOS40MWMtMTAuMTIsMC0xOC4yMi04LjExLTE4LjIyLTE4LjIyVjkxLjU4YzAtMTAuMTMsOC4xLTE4LjI0LDE4LjIyLTE4LjI0aDEwOS40WiIvPgogICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNNDkyLjQzLDczLjM0YzEwLjEyLDAsMTguMjMsOC4xMSwxOC4yMywxOC4yNHYxMy42N2MwLDEwLjEzLTguMTEsMTguMjMtMTguMjMsMTguMjNoLTc3LjQ4djk1LjIyaDYzLjgxYzEwLjEzLDAsMTguMjQsOC4xLDE4LjI0LDE4LjIzdjEzLjY3YzAsMTAuMTItOC4xMSwxOC4yMi0xOC4yNCwxOC4yMmgtNjMuODF2OTUuNzJoNzcuNDhjMTAuMTIsMCwxOC4yMyw4LjEsMTguMjMsMTguMjN2MTMuNjhjMCwxMC4xMS04LjExLDE4LjIyLTE4LjIzLDE4LjIyaC0xMDkuMzljLTEwLjEyLDAtMTguMjMtOC4xMS0xOC4yMy0xOC4yMlY5MS41OGMwLTEwLjEzLDguMTEtMTguMjQsMTguMjMtMTguMjRoMTA5LjM5WiIvPgogICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNNTY2Ljg4LDQxNC42OWMtMTAuMTMsMC0xOC4yMy04LjExLTE4LjIzLTE4LjIzVjkxLjU4YzAtMTAuMTMsOC4xLTE4LjI0LDE4LjIzLTE4LjI0aDUxLjY1YzYwLjc3LDAsODkuMTQsMzQuNDUsODkuMTQsMTAwLjI4djE0MC44YzAsNjUuODQtMjguMzcsMTAwLjI3LTg5LjE0LDEwMC4yN2gtNTEuNjVaTTU5OC43OCwxMjMuNDd2MjQxLjA3aDE5Ljc2YzI2Ljg0LDAsMzcuOTktMTYuMjEsMzcuOTktNTAuMTR2LTE0MC43OWMwLTMzLjkzLTExLjE0LTUwLjEzLTM3Ljk5LTUwLjEzaC0xOS43NloiLz4KICAgIDxnPgogICAgICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik03NjcuMjYsNDEwLjhoLTE1LjM2Vjc3LjA3aDEzLjM3bDg1LjY2LDI5Ny41OCw4NS4xNy0yOTcuNThoMTMuODZ2MzMzLjczaC0xNS44NFYxNDAuNDVsLTc3LjI1LDI3MC4zNWgtMTEuODdsLTc3Ljc0LTI3MC4zNXYyNzAuMzVoMFoiLz4KICAgICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMTA2NS41Myw0MTAuOGMtNy45MSwwLTE2LjA5LTEuMTUtMjQuNTEtMy40Ni04LjQyLTIuMy0xNi4wOS02Ljc1LTIzLjAzLTEzLjM4LTYuOTQtNi41OS0xMi41NS0xNS41OS0xNi44My0yNi45OC00LjMxLTExLjM4LTYuNDUtMjYuMzItNi40NS00NC44MXYtMTU2Ljk2YzAtMjguMzksNS43OC01MC4xOCwxNy4zMy02NS4zNiwxMi4yMS0xNS4xOSwzMC4wMy0yMi43OCw1My40Ny0yMi43OHM0MS41OSw3LjU5LDUzLjQ4LDIyLjc4YzExLjg4LDE0Ljg2LDE3LjgzLDM2LjY0LDE3LjgzLDY1LjM2djE1Ni45NmMwLDE4LjQ5LTIuMTYsMzMuNDItNi40NSw0NC44MS00LjI5LDExLjM5LTkuOSwyMC4zOS0xNi44NCwyNi45OC02LjkzLDYuNjItMTQuNiwxMS4wOC0yMy4wMiwxMy4zOC04LjQxLDIuMzEtMTYuNzYsMy40Ni0yNS4wMSwzLjQ2Wk0xMDY1LjUzLDkyLjQxYy0xOC44MiwwLTMyLjUyLDUuNzktNDEuMDksMTcuMzMtOS41OCwxMi4yMi0xNC4zNiwzMC43LTE0LjM2LDU1LjQ2djE1Ni45NmMwLDI1LjA5LDQuNzgsNDMuNzUsMTQuMzYsNTUuOTUsOC45MSwxMS41NiwyMi42MSwxNy4zNCw0MS4wOSwxNy4zNHMzMi4wMi01Ljc4LDQxLjU5LTE3LjM0YzkuMjQtMTEuNTQsMTMuODYtMzAuMjEsMTMuODYtNTUuOTV2LTE1Ni45NmMwLTI1LjQyLTQuNjItNDMuOTEtMTMuODYtNTUuNDYtOS4yNC0xMS41NC0yMy4xMS0xNy4zMy00MS41OS0xNy4zM1oiLz4KICAgICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMTI3NC42OSwyNDMuOTRjNi45MywzLjMsMTMuMDQsOC4wOSwxOC4zMiwxNC4zNiwxMS41NSwxNC41MywxNy4zMiwzNi4zMSwxNy4zMiw2NS4zNnMtNS43Nyw1MC44NC0xNy4zMiw2NS4zNmMtMTIuMjEsMTQuNTItMzEuMDMsMjEuNzgtNTYuNDUsMjEuNzhoLTU0Ljk1Vjc3LjA3aDU0Ljk1YzI1LjQyLDAsNDQuMjQsNy4yNyw1Ni40NSwyMS43OCwxMS41NSwxNC41MywxNy4zMiwzNi4zMiwxNy4zMiw2NS4zNnMtNS43Nyw1MC4zNC0xNy4zMiw2NC44N2MtMi42NSwzLjMxLTUuNDYsNi4xMi04LjQyLDguNDItMi45NywyLjMxLTYuMjcsNC40NS05LjksNi40NFpNMTE5Ny40NCwyMzYuMDFoMzkuMTFjMjAuNDgsMCwzNS4xNi01LjYxLDQ0LjA4LTE2Ljg0LDkuMjMtMTEuMjIsMTMuODYtMjkuNTQsMTMuODYtNTQuOTZzLTQuNDUtNDQuMTQtMTMuMzYtNTUuMjFjLTguOTMtMTEuMDYtMjMuNzgtMTYuNTktNDQuNTctMTYuNTloLTM5LjExdjE0My42aDBaTTEyMzYuNTUsMzk1LjQ1YzIwLjc5LDAsMzUuNjUtNS41Myw0NC41Ny0xNi42LDguOTItMTEuMDQsMTMuMzYtMjkuNDYsMTMuMzYtNTUuMnMtNC42Mi00NC4yMi0xMy44Ni01NS40NWMtOC45MS0xMS4yMy0yMy42LTE2Ljg1LTQ0LjA2LTE2Ljg1aC0zOS4xM3YxNDQuMDloMzkuMTFaIi8+CiAgICA8L2c+CiAgICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik0xNDEwLjcxLDBjLTQyLjU2LDAtNzcuMDcsMzQuNS03Ny4wNyw3Ny4wNnMzNC41MSw3Ny4wNyw3Ny4wNyw3Ny4wNyw3Ny4wNi0zNC41MSw3Ny4wNi03Ny4wN1MxNDUzLjI3LDAsMTQxMC43MSwwWk0xNDU2Ljg2LDgwLjc2YzAsNS4xMy00LjEsOS4yMS04Ljk1LDkuMjFoLTI0LjN2MjQuMDNjMCw1LjEyLTQuMDgsOS4yMS05LjIsOS4yMWgtNy40MWMtNC44NiwwLTguOTUtNC4wOS04Ljk1LTkuMjF2LTI0LjAzaC0yNC4yOWMtNS4xLDAtOS4yLTQuMDgtOS4yLTkuMjF2LTcuNGMwLTQuODYsNC4xLTguOTUsOS4yLTguOTVoMjQuMjl2LTI0LjI4YzAtNS4xMyw0LjA5LTkuMjEsOC45NS05LjIxaDcuNDFjNS4xMiwwLDkuMiw0LjA4LDkuMiw5LjIxdjI0LjI4aDI0LjNjNC44NSwwLDguOTUsNC4wOSw4Ljk1LDguOTV2Ny40WiIvPgogICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMTQ1Ni44Niw3My4zNnY3LjRjMCw1LjEzLTQuMSw5LjIxLTguOTUsOS4yMWgtMjQuM3YyNC4wM2MwLDUuMTItNC4wOCw5LjIxLTkuMiw5LjIxaC03LjQxYy00Ljg2LDAtOC45NS00LjA5LTguOTUtOS4yMXYtMjQuMDNoLTI0LjI5Yy01LjEsMC05LjItNC4wOC05LjItOS4yMXYtNy40YzAtNC44Niw0LjEtOC45NSw5LjItOC45NWgyNC4yOXYtMjQuMjhjMC01LjEzLDQuMDktOS4yMSw4Ljk1LTkuMjFoNy40MWM1LjEyLDAsOS4yLDQuMDgsOS4yLDkuMjF2MjQuMjhoMjQuM2M0Ljg1LDAsOC45NSw0LjA5LDguOTUsOC45NVoiLz4KICA8L2c+Cjwvc3ZnPg==" alt="FeedMob">
+    </div>
+    <div class="badge">Step-by-Step Guide</div>
+    <h1>Set Up <span>LiteLLM</span> &amp; Web Search<br>for Your AI Tools</h1>
+    <p>A complete guide to create your account and connect Kilo, Codex CLI, and Claude Code — so they can search the web for current information.</p>
+  </div>
+</header>
+
+<nav class="top-bar">
+  <div class="container">
+    <a href="#addresses">Two Addresses</a>
+    <a href="#account">Create Account</a>
+    <a href="#kilo">Kilo</a>
+    <a href="#codex">Codex CLI</a>
+    <a href="#claude">Claude Code</a>
+    <a href="#verify">Verify</a>
+    <a href="#faq">FAQ</a>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- Intro / Two addresses -->
+  <section class="section" id="addresses">
+    <div class="section-title">Before You Start: Two Web Addresses</div>
+    <div class="card">
+      <p>This process uses two different web addresses with completely different purposes.
+      This is the most common source of mistakes, so please note them first.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Purpose</th><th>Address</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="addr-pill">1</span> Register your account &amp; manage keys (web portal)</td>
+              <td><code>https://litellm.feedmob.ai</code></td>
+            </tr>
+            <tr>
+              <td><span class="addr-pill">2</span> The “service address” you enter into each AI tool</td>
+              <td><code>https://litellm-api.feedmob.ai</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="warn-box">
+        <div>Create your account and key on address <b>1</b>; but the service address you enter
+        into the AI tools must always be address <b>2</b>. If you mistakenly use address 1, the AI
+        tool will still chat but won't be able to search the web.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Step 1: account -->
+  <section class="section" id="account">
+    <div class="step-header">
+      <div class="step-number">1</div>
+      <h2>Create a LiteLLM Account and Get Your Key</h2>
+    </div>
+    <div class="card">
+      <h3>Ask an administrator to invite you</h3>
+      <p>Your account must be created via an invitation from the administrator, <strong>Rao</strong>.
+      Please contact her and let her know you need a LiteLLM account. You will then receive an invitation email.</p>
+
+      <h3 class="spaced">Open the link in the email and register</h3>
+      <p>Find the invitation email in your inbox, click the registration link inside, and fill in the
+      requested information to complete sign-up.</p>
+
+      <div class="screenshot">
+        <div class="placeholder">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          <span>Screenshot placeholder — invitation email / registration page</span>
+        </div>
+        <div class="screenshot-caption">Invitation email with the registration link</div>
+      </div>
+
+      <h3 class="spaced">Log in and create a key</h3>
+      <ol class="steps-list">
+        <li>Open the portal in your browser: <code class="inline">https://litellm.feedmob.ai</code></li>
+        <li>Log in with the account you just registered.</li>
+        <li>Find the <strong>Virtual Keys</strong> page in the menu.</li>
+        <li>Click the <strong>Create New Key</strong> button.</li>
+        <li>In <strong>Key Name</strong>, enter a name you'll recognize, e.g. <code class="inline">my-key</code>. Leave the other options at their defaults.</li>
+        <li>Click create. The page will show a key starting with <code class="inline">sk-</code>.</li>
+      </ol>
+
+      <div class="screenshot">
+        <div class="placeholder">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          <span>Screenshot placeholder — Virtual Keys → Create New Key</span>
+        </div>
+        <div class="screenshot-caption">Virtual Keys page — creating a new key</div>
+      </div>
+
+      <div class="info-box">
+        <div>Copy this <code class="inline">sk-</code> key immediately and store it somewhere safe
+        (e.g. a password manager). Once the page is closed you usually cannot view it in full again.
+        Wherever you see <code class="ph">sk-xxxxxxxx</code> below, it stands for your real key.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Step 2 intro -->
+  <section class="section">
+    <div class="step-header">
+      <div class="step-number">2</div>
+      <h2>Connect Your AI Tools</h2>
+    </div>
+    <div class="card">
+      <p>Below are the setup instructions for three common tools. You only need to configure the one
+      you actually use — you don't have to do all three. The model name is always
+      <code class="inline">minimax/minimax-m3</code>.</p>
+    </div>
+  </section>
+
+  <!-- Kilo -->
+  <section class="section" id="kilo">
+    <div class="section-title">A · Kilo <span style="font-size:0.7em;color:var(--fm-muted);font-weight:400;">(VSCode extension)</span></div>
+    <div class="card">
+      <p>Kilo is an AI assistant inside VSCode. We recommend adding the service through its graphical
+      interface first, then adjusting settings as needed.</p>
+
+      <h3 class="spaced">Part 1 — Add a custom provider in the Kilo UI</h3>
+      <ul class="bullets">
+        <li>Open Kilo settings and choose to add a custom provider.</li>
+        <li>In the <strong>API Key</strong> field, paste your <code class="ph">sk-xxxxxxxx</code> key.</li>
+        <li>In the <strong>service address (base URL)</strong> field, enter the value below:</li>
+      </ul>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-dots"><i></i><i></i><i></i></div>
+          <span>Base URL</span>
+          <button class="copy-btn" onclick="copyCode(this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            Copy
+          </button>
+        </div>
+        <pre><code>https://litellm-api.feedmob.ai/v1</code></pre>
+      </div>
+
+      <div class="screenshot">
+        <div class="placeholder">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          <span>Screenshot placeholder — Kilo custom provider dialog</span>
+        </div>
+        <div class="screenshot-caption">Kilo — adding a custom provider with API Key and base URL</div>
+      </div>
+
+      <h3 class="spaced">Part 2 (optional) — Add capabilities such as image recognition</h3>
+      <p>If you need options not available in the UI (such as image recognition), edit the config file
+      <code class="inline">~/.config/kilo/kilo.jsonc</code> using the example below:</p>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-dots"><i></i><i></i><i></i></div>
+          <span>~/.config/kilo/kilo.jsonc</span>
+          <button class="copy-btn" onclick="copyCode(this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            Copy
+          </button>
+        </div>
+        <pre><code>{
+  "model": "litellm/minimax-m3",
+  "provider": {
+    "litellm": {
+      "name": "LiteLLM",
+      "npm": "@ai-sdk/openai",
+      "options": {
+        "baseURL": "https://litellm-api.feedmob.ai/v1",
+        "timeout": 300000
+      },
+      "models": {
+        "minimax-m3": {
+          "id": "minimax/minimax-m3",
+          "name": "MiniMax M3",
+          "tool_call": true,
+          "reasoning": true,
+          "attachment": true,
+          "modalities": { "input": ["text", "image"], "output": ["text"] }
+        }
+      }
+    }
+  }
+}</code></pre>
+      </div>
+      <div class="info-box">
+        <div>You do not need to enter the key again in the config file. As long as the provider name is
+        still <code class="inline">litellm</code> (matching what you added in the UI), Kilo will reuse the
+        key you entered there. Restart VSCode after editing for changes to take effect.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Codex -->
+  <section class="section" id="codex">
+    <div class="section-title">B · Codex CLI <span style="font-size:0.7em;color:var(--fm-muted);font-weight:400;">(command-line tool)</span></div>
+    <div class="card">
+      <p>Edit the config file <code class="inline">~/.codex/config.toml</code> and add the following:</p>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-dots"><i></i><i></i><i></i></div>
+          <span>~/.codex/config.toml</span>
+          <button class="copy-btn" onclick="copyCode(this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            Copy
+          </button>
+        </div>
+        <pre><code>model = "minimax/minimax-m3"
+model_provider = "litellm"
+
+[model_providers.litellm]
+name = "litellm"
+base_url = "https://litellm-api.feedmob.ai"
+wire_api = "responses"
+requires_openai_auth = true
+env_key = "LL_API_KEY"</code></pre>
+      </div>
+      <p>Then set your key as an environment variable (we recommend adding it to
+      <code class="inline">~/.bashrc</code> or <code class="inline">~/.zshrc</code> so it persists):</p>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-dots"><i></i><i></i><i></i></div>
+          <span>Environment variable</span>
+          <button class="copy-btn" onclick="copyCode(this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            Copy
+          </button>
+        </div>
+        <pre><code>export LL_API_KEY="sk-xxxxxxxx"</code></pre>
+      </div>
+      <div class="info-box">
+        <div>The service address here does not include <code class="inline">/v1</code> — Codex adds it
+        automatically. After setup, open a new terminal and run <code class="inline">codex</code>. If you
+        see a message like “Model metadata … not found / fallback metadata”, this is a known notice and
+        does not affect usage.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Claude Code -->
+  <section class="section" id="claude">
+    <div class="section-title">C · Claude Code CLI <span style="font-size:0.7em;color:var(--fm-muted);font-weight:400;">(command-line tool)</span></div>
+    <div class="card">
+      <p>Connect by setting three environment variables (again, we recommend adding them to
+      <code class="inline">~/.bashrc</code> or <code class="inline">~/.zshrc</code>):</p>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-dots"><i></i><i></i><i></i></div>
+          <span>Environment variables</span>
+          <button class="copy-btn" onclick="copyCode(this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            Copy
+          </button>
+        </div>
+        <pre><code>export ANTHROPIC_BASE_URL="https://litellm-api.feedmob.ai"
+export ANTHROPIC_AUTH_TOKEN="sk-xxxxxxxx"
+export ANTHROPIC_MODEL="minimax/minimax-m3"</code></pre>
+      </div>
+      <div class="info-box">
+        <div>After setup, open a new terminal and run <code class="inline">claude</code>. Its web search
+        runs through the service address automatically.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Verify -->
+  <section class="section" id="verify">
+    <div class="step-header">
+      <div class="step-number">3</div>
+      <h2>Verify It Works</h2>
+    </div>
+    <div class="card">
+      <p>In whichever tool you configured, ask a question that needs current information, for example:</p>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-dots"><i></i><i></i><i></i></div>
+          <span>Test prompt</span>
+          <button class="copy-btn" onclick="copyCode(this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            Copy
+          </button>
+        </div>
+        <pre><code>Search for the latest international oil prices (Brent / WTI).</code></pre>
+      </div>
+      <ul class="bullets">
+        <li>If it returns recent information with source links, web search is working.</li>
+        <li>If it can't search, first check: whether the service address was set to address <strong>2</strong>
+        (not address 1), whether the key is correct, and whether the model name is
+        <code class="inline">minimax/minimax-m3</code>.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section" id="faq">
+    <div class="section-title">Frequently Asked Questions</div>
+    <div class="card">
+      <div class="faq-list">
+        <div class="faq-item">
+          <div class="faq-question">Didn't receive the invitation email / can't register?</div>
+          <p>Contact the administrator, Rao, to resend the invitation.</p>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">Forgot or leaked your key?</div>
+          <p>Go back to the Virtual Keys page in the portal
+          (<code class="inline">https://litellm.feedmob.ai</code>), create a new one, and disable the old one.</p>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">Can chat normally but can't search the web?</div>
+          <p>Almost always because the service address was set to address 1. Change it to address 2.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer class="footer">
+  <img class="footer-logo-img" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMiIgZGF0YS1uYW1lPSJMYXllciAyIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDg3Ljc3IDQxNC42OSI+CiAgPGRlZnM+CiAgICA8c3R5bGU+CiAgICAgIC5jbHMtMSB7CiAgICAgICAgZmlsbDogI2ZmZjsKICAgICAgfQoKICAgICAgLmNscy0yIHsKICAgICAgICBmaWxsOiAjMDBiNWFkOwogICAgICB9CiAgICA8L3N0eWxlPgogIDwvZGVmcz4KICA8ZyBpZD0iTGF5ZXJfMS0yIiBkYXRhLW5hbWU9IkxheWVyIDEiPgogICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMTI3LjYyLDczLjM0YzEwLjEzLDAsMTguMjMsOC4xMSwxOC4yMywxOC4yNHYxMy42N2MwLDEwLjEzLTguMTEsMTguMjMtMTguMjMsMTguMjNINTAuNjR2OTUuMjJoNTYuNzJjMTAuMTQsMCwxOC4yNCw4LjEsMTguMjQsMTguMjN2MTMuNjdjMCwxMC4xMi04LjEsMTguMjItMTguMjQsMTguMjJoLTU2LjcydjEyNy42NGMwLDEwLjExLTguNiwxOC4yMi0xOC4yMywxOC4yMmgtMTQuMThjLTEwLjEzLDAtMTguMjMtOC4xMS0xOC4yMy0xOC4yMlY5MS41OGMwLTEwLjEzLDguMS0xOC4yNCwxOC4yMy0xOC4yNGgxMDkuMzlaIi8+CiAgICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0zMTAuMTEsNzMuMzRjMTAuMTMsMCwxOC4yMyw4LjExLDE4LjIzLDE4LjI0djEzLjY3YzAsMTAuMTMtOC4xLDE4LjIzLTE4LjIzLDE4LjIzaC03Ny40OHY5NS4yMmg2My44MWMxMC4xMywwLDE4LjIzLDguMSwxOC4yMywxOC4yM3YxMy42N2MwLDEwLjEyLTguMSwxOC4yMi0xOC4yMywxOC4yMmgtNjMuODF2OTUuNzJoNzcuNDljMTAuMTIsMCwxOC4yMyw4LjEsMTguMjMsMTguMjN2MTMuNjhjMCwxMC4xMS04LjEsMTguMjItMTguMjMsMTguMjJoLTEwOS40MWMtMTAuMTIsMC0xOC4yMi04LjExLTE4LjIyLTE4LjIyVjkxLjU4YzAtMTAuMTMsOC4xLTE4LjI0LDE4LjIyLTE4LjI0aDEwOS40WiIvPgogICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNNDkyLjQzLDczLjM0YzEwLjEyLDAsMTguMjMsOC4xMSwxOC4yMywxOC4yNHYxMy42N2MwLDEwLjEzLTguMTEsMTguMjMtMTguMjMsMTguMjNoLTc3LjQ4djk1LjIyaDYzLjgxYzEwLjEzLDAsMTguMjQsOC4xLDE4LjI0LDE4LjIzdjEzLjY3YzAsMTAuMTItOC4xMSwxOC4yMi0xOC4yNCwxOC4yMmgtNjMuODF2OTUuNzJoNzcuNDhjMTAuMTIsMCwxOC4yMyw4LjEsMTguMjMsMTguMjN2MTMuNjhjMCwxMC4xMS04LjExLDE4LjIyLTE4LjIzLDE4LjIyaC0xMDkuMzljLTEwLjEyLDAtMTguMjMtOC4xMS0xOC4yMy0xOC4yMlY5MS41OGMwLTEwLjEzLDguMTEtMTguMjQsMTguMjMtMTguMjRoMTA5LjM5WiIvPgogICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNNTY2Ljg4LDQxNC42OWMtMTAuMTMsMC0xOC4yMy04LjExLTE4LjIzLTE4LjIzVjkxLjU4YzAtMTAuMTMsOC4xLTE4LjI0LDE4LjIzLTE4LjI0aDUxLjY1YzYwLjc3LDAsODkuMTQsMzQuNDUsODkuMTQsMTAwLjI4djE0MC44YzAsNjUuODQtMjguMzcsMTAwLjI3LTg5LjE0LDEwMC4yN2gtNTEuNjVaTTU5OC43OCwxMjMuNDd2MjQxLjA3aDE5Ljc2YzI2Ljg0LDAsMzcuOTktMTYuMjEsMzcuOTktNTAuMTR2LTE0MC43OWMwLTMzLjkzLTExLjE0LTUwLjEzLTM3Ljk5LTUwLjEzaC0xOS43NloiLz4KICAgIDxnPgogICAgICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik03NjcuMjYsNDEwLjhoLTE1LjM2Vjc3LjA3aDEzLjM3bDg1LjY2LDI5Ny41OCw4NS4xNy0yOTcuNThoMTMuODZ2MzMzLjczaC0xNS44NFYxNDAuNDVsLTc3LjI1LDI3MC4zNWgtMTEuODdsLTc3Ljc0LTI3MC4zNXYyNzAuMzVoMFoiLz4KICAgICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMTA2NS41Myw0MTAuOGMtNy45MSwwLTE2LjA5LTEuMTUtMjQuNTEtMy40Ni04LjQyLTIuMy0xNi4wOS02Ljc1LTIzLjAzLTEzLjM4LTYuOTQtNi41OS0xMi41NS0xNS41OS0xNi44My0yNi45OC00LjMxLTExLjM4LTYuNDUtMjYuMzItNi40NS00NC44MXYtMTU2Ljk2YzAtMjguMzksNS43OC01MC4xOCwxNy4zMy02NS4zNiwxMi4yMS0xNS4xOSwzMC4wMy0yMi43OCw1My40Ny0yMi43OHM0MS41OSw3LjU5LDUzLjQ4LDIyLjc4YzExLjg4LDE0Ljg2LDE3LjgzLDM2LjY0LDE3LjgzLDY1LjM2djE1Ni45NmMwLDE4LjQ5LTIuMTYsMzMuNDItNi40NSw0NC44MS00LjI5LDExLjM5LTkuOSwyMC4zOS0xNi44NCwyNi45OC02LjkzLDYuNjItMTQuNiwxMS4wOC0yMy4wMiwxMy4zOC04LjQxLDIuMzEtMTYuNzYsMy40Ni0yNS4wMSwzLjQ2Wk0xMDY1LjUzLDkyLjQxYy0xOC44MiwwLTMyLjUyLDUuNzktNDEuMDksMTcuMzMtOS41OCwxMi4yMi0xNC4zNiwzMC43LTE0LjM2LDU1LjQ2djE1Ni45NmMwLDI1LjA5LDQuNzgsNDMuNzUsMTQuMzYsNTUuOTUsOC45MSwxMS41NiwyMi42MSwxNy4zNCw0MS4wOSwxNy4zNHMzMi4wMi01Ljc4LDQxLjU5LTE3LjM0YzkuMjQtMTEuNTQsMTMuODYtMzAuMjEsMTMuODYtNTUuOTV2LTE1Ni45NmMwLTI1LjQyLTQuNjItNDMuOTEtMTMuODYtNTUuNDYtOS4yNC0xMS41NC0yMy4xMS0xNy4zMy00MS41OS0xNy4zM1oiLz4KICAgICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMTI3NC42OSwyNDMuOTRjNi45MywzLjMsMTMuMDQsOC4wOSwxOC4zMiwxNC4zNiwxMS41NSwxNC41MywxNy4zMiwzNi4zMSwxNy4zMiw2NS4zNnMtNS43Nyw1MC44NC0xNy4zMiw2NS4zNmMtMTIuMjEsMTQuNTItMzEuMDMsMjEuNzgtNTYuNDUsMjEuNzhoLTU0Ljk1Vjc3LjA3aDU0Ljk1YzI1LjQyLDAsNDQuMjQsNy4yNyw1Ni40NSwyMS43OCwxMS41NSwxNC41MywxNy4zMiwzNi4zMiwxNy4zMiw2NS4zNnMtNS43Nyw1MC4zNC0xNy4zMiw2NC44N2MtMi42NSwzLjMxLTUuNDYsNi4xMi04LjQyLDguNDItMi45NywyLjMxLTYuMjcsNC40NS05LjksNi40NFpNMTE5Ny40NCwyMzYuMDFoMzkuMTFjMjAuNDgsMCwzNS4xNi01LjYxLDQ0LjA4LTE2Ljg0LDkuMjMtMTEuMjIsMTMuODYtMjkuNTQsMTMuODYtNTQuOTZzLTQuNDUtNDQuMTQtMTMuMzYtNTUuMjFjLTguOTMtMTEuMDYtMjMuNzgtMTYuNTktNDQuNTctMTYuNTloLTM5LjExdjE0My42aDBaTTEyMzYuNTUsMzk1LjQ1YzIwLjc5LDAsMzUuNjUtNS41Myw0NC41Ny0xNi42LDguOTItMTEuMDQsMTMuMzYtMjkuNDYsMTMuMzYtNTUuMnMtNC42Mi00NC4yMi0xMy44Ni01NS40NWMtOC45MS0xMS4yMy0yMy42LTE2Ljg1LTQ0LjA2LTE2Ljg1aC0zOS4xM3YxNDQuMDloMzkuMTFaIi8+CiAgICA8L2c+CiAgICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik0xNDEwLjcxLDBjLTQyLjU2LDAtNzcuMDcsMzQuNS03Ny4wNyw3Ny4wNnMzNC41MSw3Ny4wNyw3Ny4wNyw3Ny4wNyw3Ny4wNi0zNC41MSw3Ny4wNi03Ny4wN1MxNDUzLjI3LDAsMTQxMC43MSwwWk0xNDU2Ljg2LDgwLjc2YzAsNS4xMy00LjEsOS4yMS04Ljk1LDkuMjFoLTI0LjN2MjQuMDNjMCw1LjEyLTQuMDgsOS4yMS05LjIsOS4yMWgtNy40MWMtNC44NiwwLTguOTUtNC4wOS04Ljk1LTkuMjF2LTI0LjAzaC0yNC4yOWMtNS4xLDAtOS4yLTQuMDgtOS4yLTkuMjF2LTcuNGMwLTQuODYsNC4xLTguOTUsOS4yLTguOTVoMjQuMjl2LTI0LjI4YzAtNS4xMyw0LjA5LTkuMjEsOC45NS05LjIxaDcuNDFjNS4xMiwwLDkuMiw0LjA4LDkuMiw5LjIxdjI0LjI4aDI0LjNjNC44NSwwLDguOTUsNC4wOSw4Ljk1LDguOTV2Ny40WiIvPgogICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMTQ1Ni44Niw3My4zNnY3LjRjMCw1LjEzLTQuMSw5LjIxLTguOTUsOS4yMWgtMjQuM3YyNC4wM2MwLDUuMTItNC4wOCw5LjIxLTkuMiw5LjIxaC03LjQxYy00Ljg2LDAtOC45NS00LjA5LTguOTUtOS4yMXYtMjQuMDNoLTI0LjI5Yy01LjEsMC05LjItNC4wOC05LjItOS4yMXYtNy40YzAtNC44Niw0LjEtOC45NSw5LjItOC45NWgyNC4yOXYtMjQuMjhjMC01LjEzLDQuMDktOS4yMSw4Ljk1LTkuMjFoNy40MWM1LjEyLDAsOS4yLDQuMDgsOS4yLDkuMjF2MjQuMjhoMjQuM2M0Ljg1LDAsOC45NSw0LjA5LDguOTUsOC45NVoiLz4KICA8L2c+Cjwvc3ZnPg==" alt="FeedMob">
+  <div class="footer-divider"></div>
+  <p><strong>FeedMob</strong> &mdash; LiteLLM &amp; Web Search Setup Guide</p>
+</footer>
+
+<script>
+  function copyCode(btn) {
+    var codeBlock = btn.closest('.code-block');
+    var code = codeBlock.querySelector('code').textContent;
+    var done = function () {
+      btn.classList.add('copied');
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Copied!';
+      setTimeout(function () {
+        btn.classList.remove('copied');
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy';
+      }, 2000);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(code).then(done).catch(function () { fallback(code, done); });
+    } else { fallback(code, done); }
+  }
+  function fallback(text, done) {
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); done(); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+
+  window.addEventListener('scroll', function () {
+    var scrollTop = window.scrollY;
+    var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    var progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    document.getElementById('progressBar').style.width = progress + '%';
+  });
+
+  var sections = document.querySelectorAll('.section[id]');
+  var navLinks = document.querySelectorAll('.top-bar a');
+  function setActiveNav(id) {
+    navLinks.forEach(function (l) { l.classList.remove('active'); });
+    var a = document.querySelector('.top-bar a[href="#' + id + '"]');
+    if (a) a.classList.add('active');
+  }
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) { if (e.isIntersecting) setActiveNav(e.target.id); });
+  }, { rootMargin: '-20% 0px -80% 0px' });
+  sections.forEach(function (s) { observer.observe(s); });
+</script>
+
+</body>
+</html>

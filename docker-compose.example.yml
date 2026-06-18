@@ -19,3 +19,12 @@ services:
     ports:
       - "127.0.0.1:4001:4001"
     restart: unless-stopped
+
+  docs:
+    image: nginx:alpine
+    container_name: gluey-proxy-docs
+    volumes:
+      - ./docs:/usr/share/nginx/html:ro
+    ports:
+      - "127.0.0.1:4002:80"
+    restart: unless-stopped
