@@ -211,6 +211,41 @@
   .copy-btn.copied { background: rgba(0,181,173,0.2); color: var(--fm-teal); border-color: rgba(0,181,173,0.3); }
   .copy-btn svg { width: 14px; height: 14px; }
 
+  .download-link {
+    display: inline-flex; align-items: center; gap: 9px;
+    background: var(--fm-teal); color: white; border-radius: var(--radius-md);
+    padding: 11px 18px; margin: 8px 0 18px; font-weight: 700;
+    box-shadow: 0 4px 14px rgba(0,181,173,0.22);
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .download-link:hover {
+    background: var(--fm-teal-dark); color: white; transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(0,181,173,0.26);
+  }
+  .download-link svg { width: 16px; height: 16px; }
+
+  .copy-field {
+    display: flex; align-items: center; gap: 8px; min-height: 42px;
+    border: 1px solid var(--fm-border); border-radius: var(--radius-sm);
+    background: white; padding: 5px 5px 5px 12px; box-shadow: var(--shadow-sm);
+  }
+  .copy-field code {
+    flex: 1; min-width: 0; font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.9rem; color: var(--fm-dark); white-space: nowrap; overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .copy-field .copy-btn {
+    background: var(--fm-surface); border-color: var(--fm-border); color: var(--fm-teal-dark);
+    flex-shrink: 0;
+  }
+  .copy-field .copy-btn:hover { background: var(--fm-teal-light); color: var(--fm-teal-dark); }
+  .copy-field .copy-btn.copied {
+    background: rgba(0,181,173,0.12); color: var(--fm-teal-dark);
+    border-color: rgba(0,181,173,0.24);
+  }
+  .fallback-row { margin-top: 4px; }
+  .fallback-row .copy-field { max-width: 100%; }
+
   /* === Screenshot placeholder === */
   .screenshot {
     border: 1px solid var(--fm-border); border-radius: var(--radius-md);
@@ -310,6 +345,24 @@
   .footer .wordmark span { color: var(--fm-teal); }
   .footer-divider { width: 40px; height: 2px; background: var(--fm-teal); margin: 16px auto; border-radius: 2px; }
 
+  @media (min-width: 1200px) {
+    body { font-size: 17px; }
+    .hero { padding-top: 92px; padding-bottom: 84px; }
+    .hero-inner { max-width: 900px; }
+    .hero h1 { font-size: clamp(2.25rem, 3.2vw, 3.35rem); }
+    .hero p { font-size: 1.18rem; max-width: 640px; }
+    .container { max-width: 980px; }
+    .section { padding: 64px 0; }
+    .card { padding: 36px; }
+    .section-title, .step-header h2 { font-size: 1.6rem; }
+    .screenshot-caption { font-size: 14px; }
+  }
+
+  @media (min-width: 1600px) {
+    .container { max-width: 1060px; }
+    .top-bar .container { max-width: 1240px; }
+  }
+
   @media (max-width: 640px) {
     .hero { padding: 56px 20px 48px; }
     .card { padding: 22px; }
@@ -344,7 +397,7 @@
     <a href="#install">Install</a>
     <a href="#account">API Key</a>
     <a href="#ccswitch">CC Switch</a>
-    <a href="#mapping">Model Mapping</a>
+    <a href="#enable">Enable</a>
     <a href="#routing">Routing</a>
     <a href="#verify">Verify</a>
     <a href="#faq">FAQ</a>
@@ -392,17 +445,10 @@
     </div>
     <div class="card">
       <p>Download and install CC Switch from the official site:</p>
-      <div class="code-block">
-        <div class="code-header">
-          <div class="code-dots"><i></i><i></i><i></i></div>
-          <span>Download URL</span>
-          <button class="copy-btn" onclick="copyCode(this)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-            Copy
-          </button>
-        </div>
-        <pre><code>https://ccswitch.io/en/</code></pre>
-      </div>
+      <a class="download-link" href="https://ccswitch.io/en/" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+        Open CC Switch Download Page
+      </a>
 
       <div class="screenshot">
         <img src="assets/ccswitch-home.png" alt="CC Switch download page">
@@ -471,11 +517,11 @@
         <div class="screenshot-caption">CC Switch - select a platform and click the plus button to add a configuration</div>
       </div>
 
-      <h3 class="spaced">Configure provider details</h3>
+      <h3 class="spaced">Common provider details</h3>
       <ol class="steps-list">
-        <li>Enter a recognizable <strong>Provider Name</strong>, e.g. <code class="inline">FeedMob LiteLLM</code>.</li>
         <li>Paste your <code class="ph">sk-xxxxxxxx</code> key into <strong>API Key</strong>.</li>
         <li>Enter the service address below in <strong>API Endpoint</strong> or <strong>Base URL</strong>.</li>
+        <li>Keep the endpoint without a trailing slash.</li>
       </ol>
       <div class="code-block">
         <div class="code-header">
@@ -494,64 +540,109 @@
         <div class="screenshot-caption">Provider configuration - name, API key, and LiteLLM service address</div>
       </div>
 
-      <div class="warn-box">
-        <div>Use <code class="inline">https://litellm-api.feedmob.ai</code> here, not
-        <code class="inline">https://litellm.feedmob.ai</code>. Also avoid a trailing slash at the end of
-        the endpoint.</div>
+      <h3 class="spaced">Claude Code: open Advanced Options for model mapping</h3>
+      <p>For <strong>Claude Code</strong>, provider details and model mapping are on the same Add New
+      Provider screen, but the mapping controls are inside <strong>Advanced Options</strong>.</p>
+      <ol class="steps-list">
+        <li>Open <strong>Advanced Options</strong>.</li>
+        <li>Keep <strong>API Format</strong> as <strong>Anthropic Messages (Native)</strong>.</li>
+        <li>Keep <strong>Auth Field</strong> as <strong>ANTHROPIC_AUTH_TOKEN (Default)</strong>.</li>
+        <li>Click <strong>Fetch Models</strong>.</li>
+        <li>Use the dropdowns or type directly to set each model row to <code class="inline">minimax/minimax-m3</code>.</li>
+      </ol>
+
+      <div class="screenshot">
+        <img src="assets/ccswitch-claude-code-provider.png" alt="CC Switch Claude Code provider configuration page">
+        <div class="screenshot-caption">Claude Code provider - open Advanced Options, fetch models, and map rows to minimax/minimax-m3</div>
       </div>
-    </div>
-  </section>
 
-  <!-- Step 4: model mapping -->
-  <section class="section" id="mapping">
-    <div class="step-header">
-      <div class="step-number">4</div>
-      <h2>Configure Model Mapping</h2>
-    </div>
-    <div class="card">
-      <p>Open <strong>Model Mapping</strong>, fetch the model list, and map the platform roles to the
-      LiteLLM model. The model name is always <code class="inline">minimax/minimax-m3</code>.</p>
+      <h3 class="spaced">Claude Desktop: enable Needs model mapping</h3>
+      <p>For <strong>Claude Desktop</strong>, model mapping is visible on the Add New Provider screen
+      after you enable <strong>Needs model mapping</strong>.</p>
+      <ol class="steps-list">
+        <li>Paste your <code class="ph">sk-xxxxxxxx</code> key into <strong>API Key</strong>.</li>
+        <li>Set <strong>API Endpoint</strong> to <code class="inline">https://litellm-api.feedmob.ai</code>.</li>
+        <li>Turn on <strong>Needs model mapping</strong>.</li>
+        <li>Keep <strong>API Format</strong> as <strong>Anthropic Messages (Native)</strong>.</li>
+        <li>Click <strong>Fetch Models</strong>, then select or enter <code class="inline">minimax/minimax-m3</code> for each model row.</li>
+      </ol>
 
-      <div class="code-block">
-        <div class="code-header">
-          <div class="code-dots"><i></i><i></i><i></i></div>
-          <span>Model Mapping Values</span>
-          <button class="copy-btn" onclick="copyCode(this)">
+      <div class="screenshot">
+        <img src="assets/ccswitch-claude-desktop-provider.png" alt="CC Switch Claude Desktop provider configuration page">
+        <div class="screenshot-caption">Claude Desktop provider - enable model mapping, fetch models, and map rows to minimax/minimax-m3</div>
+      </div>
+
+      <div class="fallback-row">
+        <h3 class="spaced">Default fallback model</h3>
+        <p>The screenshots above stop before the bottom of the form. After filling the visible model
+        rows, scroll down and set <strong>Default fallback model</strong> to the same model:</p>
+        <div class="copy-field">
+          <code>minimax/minimax-m3</code>
+          <button class="copy-btn" onclick="copyField(this)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
             Copy
           </button>
         </div>
-        <pre><code>Sonnet: minimax/minimax-m3
-Opus:   minimax/minimax-m3
-Haiku:  minimax/minimax-m3</code></pre>
-      </div>
-
-      <div class="screenshot">
-        <img src="assets/ccswitch-model-mapping.png" alt="CC Switch model mapping page">
-        <div class="screenshot-caption">Model Mapping - fetch models and map each role to minimax/minimax-m3</div>
       </div>
 
       <div class="info-box">
-        <div>For Claude-family platforms, enable <strong>Needs model mapping</strong> when CC Switch
-        shows that option. It maps Claude's Sonnet, Opus, and Haiku roles to the actual LiteLLM model.</div>
+        <div>Use <strong>Quick Set</strong> if your CC Switch version provides it. For rows that show
+        <strong>Declare 1M</strong>, keep it enabled. The fallback field is easy to miss because it
+        appears below the visible part of the form.</div>
       </div>
     </div>
   </section>
 
-  <!-- Step 5: routing -->
+  <!-- Step 5: enable -->
+  <section class="section" id="enable">
+    <div class="step-header">
+      <div class="step-number">4</div>
+      <h2>Enable the Provider and Check Routing Requirement</h2>
+    </div>
+    <div class="card">
+      <p>Return to the CC Switch provider list, select your LiteLLM provider, and click
+      <strong>Enable</strong>. Then check whether CC Switch marks the provider as
+      <strong>Requires routing</strong>. This label is expected for the Claude Desktop setup.</p>
+
+      <div class="screenshot">
+        <img src="assets/ccswitch-enable-provider.png" alt="CC Switch provider list with Enable button">
+        <div class="screenshot-caption">Provider list - select the LiteLLM provider and click Enable</div>
+      </div>
+
+      <ol class="steps-list">
+        <li>Click <strong>Enable</strong> on your LiteLLM provider.</li>
+        <li>If the provider shows <strong>Requires routing</strong>, continue to the Routing step below before testing.</li>
+        <li>If it does not show that label, close and reopen the target app, then send a short test message.</li>
+      </ol>
+
+      <div class="info-box">
+        <div>For Claude Desktop, enabling the provider alone is not enough. You must also enable
+        routing so requests from Claude Desktop go through the LiteLLM provider.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Step 6: routing -->
   <section class="section" id="routing">
     <div class="step-header">
       <div class="step-number">5</div>
-      <h2>Enable Routing if Needed</h2>
+      <h2>Enable Routing for Claude Desktop</h2>
     </div>
     <div class="card">
-      <p>If the configured app does not use LiteLLM after provider setup, enable routing in CC Switch.
-      Some versions show the routing switch on the main page; others require opening Settings first.</p>
+      <p>This step is required for the Claude Desktop configuration above. CC Switch uses routing to
+      send Claude Desktop traffic through the provider marked <strong>Requires routing</strong>.</p>
 
       <div class="screenshot">
-        <img src="assets/ccswitch-routing-main.png" alt="CC Switch routing switch on main page">
-        <div class="screenshot-caption">Main page - routing toggle and Settings button</div>
+        <img src="assets/ccswitch-routing-required.png" alt="CC Switch provider list showing Requires routing and routing toggle">
+        <div class="screenshot-caption">Requires routing - turn on the routing switch at the top before retrying Claude Desktop</div>
       </div>
+
+      <ul class="bullets">
+        <li>Turn on the routing switch at the top of CC Switch.</li>
+        <li>If the top routing switch is not visible, click the <strong>Settings</strong> icon near the CC Switch title, open <strong>Routing</strong>, and enable the routing controls shown below.</li>
+        <li>After changing routing, close and reopen <strong>Claude Desktop</strong> before testing again.</li>
+        <li>If you are configuring Claude Code instead and it already works after clicking <strong>Enable</strong>, you can skip this Routing step.</li>
+      </ul>
 
       <div class="screenshot">
         <img src="assets/ccswitch-routing-settings.png" alt="CC Switch routing settings page">
@@ -559,9 +650,8 @@ Haiku:  minimax/minimax-m3</code></pre>
       </div>
 
       <div class="info-box">
-        <div>Keep the CC Switch routing service running while you use the configured desktop app or
-        code editor. If the app still uses the old account, toggle routing off and on once, then restart
-        the target app.</div>
+        <div>When routing is enabled, keep CC Switch running while you use Claude Desktop. If the app
+        still uses the old provider, toggle routing off and on once, then reopen Claude Desktop.</div>
       </div>
     </div>
   </section>
@@ -653,6 +743,22 @@ Haiku:  minimax/minimax-m3</code></pre>
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(code).then(done).catch(function () { fallback(code, done); });
     } else { fallback(code, done); }
+  }
+  function copyField(btn) {
+    var field = btn.closest('.copy-field');
+    var text = field.querySelector('code').textContent;
+    var original = btn.innerHTML;
+    var done = function () {
+      btn.classList.add('copied');
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Copied!';
+      setTimeout(function () {
+        btn.classList.remove('copied');
+        btn.innerHTML = original;
+      }, 2000);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function () { fallback(text, done); });
+    } else { fallback(text, done); }
   }
   function fallback(text, done) {
     var ta = document.createElement('textarea');
