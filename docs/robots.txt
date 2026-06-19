@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+# Indexing is disabled by the X-Robots-Tag response header and the HTML robots meta tag.

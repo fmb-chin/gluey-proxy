@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LiteLLM & Web Search Setup Guide</title>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<title>LiteLLM & CC Switch Setup Guide</title>
+<link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
@@ -331,18 +333,19 @@
       <img class="hero-logo-img" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMiIgZGF0YS1uYW1lPSJMYXllciAyIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDg3Ljc3IDQxNC42OSI+CiAgPGRlZnM+CiAgICA8c3R5bGU+CiAgICAgIC5jbHMtMSB7CiAgICAgICAgZmlsbDogI2ZmZjsKICAgICAgfQoKICAgICAgLmNscy0yIHsKICAgICAgICBmaWxsOiAjMDBiNWFkOwogICAgICB9CiAgICA8L3N0eWxlPgogIDwvZGVmcz4KICA8ZyBpZD0iTGF5ZXJfMS0yIiBkYXRhLW5hbWU9IkxheWVyIDEiPgogICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMTI3LjYyLDczLjM0YzEwLjEzLDAsMTguMjMsOC4xMSwxOC4yMywxOC4yNHYxMy42N2MwLDEwLjEzLTguMTEsMTguMjMtMTguMjMsMTguMjNINTAuNjR2OTUuMjJoNTYuNzJjMTAuMTQsMCwxOC4yNCw4LjEsMTguMjQsMTguMjN2MTMuNjdjMCwxMC4xMi04LjEsMTguMjItMTguMjQsMTguMjJoLTU2LjcydjEyNy42NGMwLDEwLjExLTguNiwxOC4yMi0xOC4yMywxOC4yMmgtMTQuMThjLTEwLjEzLDAtMTguMjMtOC4xMS0xOC4yMy0xOC4yMlY5MS41OGMwLTEwLjEzLDguMS0xOC4yNCwxOC4yMy0xOC4yNGgxMDkuMzlaIi8+CiAgICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0zMTAuMTEsNzMuMzRjMTAuMTMsMCwxOC4yMyw4LjExLDE4LjIzLDE4LjI0djEzLjY3YzAsMTAuMTMtOC4xLDE4LjIzLTE4LjIzLDE4LjIzaC03Ny40OHY5NS4yMmg2My44MWMxMC4xMywwLDE4LjIzLDguMSwxOC4yMywxOC4yM3YxMy42N2MwLDEwLjEyLTguMSwxOC4yMi0xOC4yMywxOC4yMmgtNjMuODF2OTUuNzJoNzcuNDljMTAuMTIsMCwxOC4yMyw4LjEsMTguMjMsMTguMjN2MTMuNjhjMCwxMC4xMS04LjEsMTguMjItMTguMjMsMTguMjJoLTEwOS40MWMtMTAuMTIsMC0xOC4yMi04LjExLTE4LjIyLTE4LjIyVjkxLjU4YzAtMTAuMTMsOC4xLTE4LjI0LDE4LjIyLTE4LjI0aDEwOS40WiIvPgogICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNNDkyLjQzLDczLjM0YzEwLjEyLDAsMTguMjMsOC4xMSwxOC4yMywxOC4yNHYxMy42N2MwLDEwLjEzLTguMTEsMTguMjMtMTguMjMsMTguMjNoLTc3LjQ4djk1LjIyaDYzLjgxYzEwLjEzLDAsMTguMjQsOC4xLDE4LjI0LDE4LjIzdjEzLjY3YzAsMTAuMTItOC4xMSwxOC4yMi0xOC4yNCwxOC4yMmgtNjMuODF2OTUuNzJoNzcuNDhjMTAuMTIsMCwxOC4yMyw4LjEsMTguMjMsMTguMjN2MTMuNjhjMCwxMC4xMS04LjExLDE4LjIyLTE4LjIzLDE4LjIyaC0xMDkuMzljLTEwLjEyLDAtMTguMjMtOC4xMS0xOC4yMy0xOC4yMlY5MS41OGMwLTEwLjEzLDguMTEtMTguMjQsMTguMjMtMTguMjRoMTA5LjM5WiIvPgogICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNNTY2Ljg4LDQxNC42OWMtMTAuMTMsMC0xOC4yMy04LjExLTE4LjIzLTE4LjIzVjkxLjU4YzAtMTAuMTMsOC4xLTE4LjI0LDE4LjIzLTE4LjI0aDUxLjY1YzYwLjc3LDAsODkuMTQsMzQuNDUsODkuMTQsMTAwLjI4djE0MC44YzAsNjUuODQtMjguMzcsMTAwLjI3LTg5LjE0LDEwMC4yN2gtNTEuNjVaTTU5OC43OCwxMjMuNDd2MjQxLjA3aDE5Ljc2YzI2Ljg0LDAsMzcuOTktMTYuMjEsMzcuOTktNTAuMTR2LTE0MC43OWMwLTMzLjkzLTExLjE0LTUwLjEzLTM3Ljk5LTUwLjEzaC0xOS43NloiLz4KICAgIDxnPgogICAgICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik03NjcuMjYsNDEwLjhoLTE1LjM2Vjc3LjA3aDEzLjM3bDg1LjY2LDI5Ny41OCw4NS4xNy0yOTcuNThoMTMuODZ2MzMzLjczaC0xNS44NFYxNDAuNDVsLTc3LjI1LDI3MC4zNWgtMTEuODdsLTc3Ljc0LTI3MC4zNXYyNzAuMzVoMFoiLz4KICAgICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMTA2NS41Myw0MTAuOGMtNy45MSwwLTE2LjA5LTEuMTUtMjQuNTEtMy40Ni04LjQyLTIuMy0xNi4wOS02Ljc1LTIzLjAzLTEzLjM4LTYuOTQtNi41OS0xMi41NS0xNS41OS0xNi44My0yNi45OC00LjMxLTExLjM4LTYuNDUtMjYuMzItNi40NS00NC44MXYtMTU2Ljk2YzAtMjguMzksNS43OC01MC4xOCwxNy4zMy02NS4zNiwxMi4yMS0xNS4xOSwzMC4wMy0yMi43OCw1My40Ny0yMi43OHM0MS41OSw3LjU5LDUzLjQ4LDIyLjc4YzExLjg4LDE0Ljg2LDE3LjgzLDM2LjY0LDE3LjgzLDY1LjM2djE1Ni45NmMwLDE4LjQ5LTIuMTYsMzMuNDItNi40NSw0NC44MS00LjI5LDExLjM5LTkuOSwyMC4zOS0xNi44NCwyNi45OC02LjkzLDYuNjItMTQuNiwxMS4wOC0yMy4wMiwxMy4zOC04LjQxLDIuMzEtMTYuNzYsMy40Ni0yNS4wMSwzLjQ2Wk0xMDY1LjUzLDkyLjQxYy0xOC44MiwwLTMyLjUyLDUuNzktNDEuMDksMTcuMzMtOS41OCwxMi4yMi0xNC4zNiwzMC43LTE0LjM2LDU1LjQ2djE1Ni45NmMwLDI1LjA5LDQuNzgsNDMuNzUsMTQuMzYsNTUuOTUsOC45MSwxMS41NiwyMi42MSwxNy4zNCw0MS4wOSwxNy4zNHMzMi4wMi01Ljc4LDQxLjU5LTE3LjM0YzkuMjQtMTEuNTQsMTMuODYtMzAuMjEsMTMuODYtNTUuOTV2LTE1Ni45NmMwLTI1LjQyLTQuNjItNDMuOTEtMTMuODYtNTUuNDYtOS4yNC0xMS41NC0yMy4xMS0xNy4zMy00MS41OS0xNy4zM1oiLz4KICAgICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMTI3NC42OSwyNDMuOTRjNi45MywzLjMsMTMuMDQsOC4wOSwxOC4zMiwxNC4zNiwxMS41NSwxNC41MywxNy4zMiwzNi4zMSwxNy4zMiw2NS4zNnMtNS43Nyw1MC44NC0xNy4zMiw2NS4zNmMtMTIuMjEsMTQuNTItMzEuMDMsMjEuNzgtNTYuNDUsMjEuNzhoLTU0Ljk1Vjc3LjA3aDU0Ljk1YzI1LjQyLDAsNDQuMjQsNy4yNyw1Ni40NSwyMS43OCwxMS41NSwxNC41MywxNy4zMiwzNi4zMiwxNy4zMiw2NS4zNnMtNS43Nyw1MC4zNC0xNy4zMiw2NC44N2MtMi42NSwzLjMxLTUuNDYsNi4xMi04LjQyLDguNDItMi45NywyLjMxLTYuMjcsNC40NS05LjksNi40NFpNMTE5Ny40NCwyMzYuMDFoMzkuMTFjMjAuNDgsMCwzNS4xNi01LjYxLDQ0LjA4LTE2Ljg0LDkuMjMtMTEuMjIsMTMuODYtMjkuNTQsMTMuODYtNTQuOTZzLTQuNDUtNDQuMTQtMTMuMzYtNTUuMjFjLTguOTMtMTEuMDYtMjMuNzgtMTYuNTktNDQuNTctMTYuNTloLTM5LjExdjE0My42aDBaTTEyMzYuNTUsMzk1LjQ1YzIwLjc5LDAsMzUuNjUtNS41Myw0NC41Ny0xNi42LDguOTItMTEuMDQsMTMuMzYtMjkuNDYsMTMuMzYtNTUuMnMtNC42Mi00NC4yMi0xMy44Ni01NS40NWMtOC45MS0xMS4yMy0yMy42LTE2Ljg1LTQ0LjA2LTE2Ljg1aC0zOS4xM3YxNDQuMDloMzkuMTFaIi8+CiAgICA8L2c+CiAgICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik0xNDEwLjcxLDBjLTQyLjU2LDAtNzcuMDcsMzQuNS03Ny4wNyw3Ny4wNnMzNC41MSw3Ny4wNyw3Ny4wNyw3Ny4wNyw3Ny4wNi0zNC41MSw3Ny4wNi03Ny4wN1MxNDUzLjI3LDAsMTQxMC43MSwwWk0xNDU2Ljg2LDgwLjc2YzAsNS4xMy00LjEsOS4yMS04Ljk1LDkuMjFoLTI0LjN2MjQuMDNjMCw1LjEyLTQuMDgsOS4yMS05LjIsOS4yMWgtNy40MWMtNC44NiwwLTguOTUtNC4wOS04Ljk1LTkuMjF2LTI0LjAzaC0yNC4yOWMtNS4xLDAtOS4yLTQuMDgtOS4yLTkuMjF2LTcuNGMwLTQuODYsNC4xLTguOTUsOS4yLTguOTVoMjQuMjl2LTI0LjI4YzAtNS4xMyw0LjA5LTkuMjEsOC45NS05LjIxaDcuNDFjNS4xMiwwLDkuMiw0LjA4LDkuMiw5LjIxdjI0LjI4aDI0LjNjNC44NSwwLDguOTUsNC4wOSw4Ljk1LDguOTV2Ny40WiIvPgogICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMTQ1Ni44Niw3My4zNnY3LjRjMCw1LjEzLTQuMSw5LjIxLTguOTUsOS4yMWgtMjQuM3YyNC4wM2MwLDUuMTItNC4wOCw5LjIxLTkuMiw5LjIxaC03LjQxYy00Ljg2LDAtOC45NS00LjA5LTguOTUtOS4yMXYtMjQuMDNoLTI0LjI5Yy01LjEsMC05LjItNC4wOC05LjItOS4yMXYtNy40YzAtNC44Niw0LjEtOC45NSw5LjItOC45NWgyNC4yOXYtMjQuMjhjMC01LjEzLDQuMDktOS4yMSw4Ljk1LTkuMjFoNy40MWM1LjEyLDAsOS4yLDQuMDgsOS4yLDkuMjF2MjQuMjhoMjQuM2M0Ljg1LDAsOC45NSw0LjA5LDguOTUsOC45NVoiLz4KICA8L2c+Cjwvc3ZnPg==" alt="FeedMob">
     </div>
     <div class="badge">Step-by-Step Guide</div>
-    <h1>Set Up <span>LiteLLM</span> &amp; Web Search<br>for Your AI Tools</h1>
-    <p>A complete guide to create your account and connect Kilo, Codex CLI, and Claude Code — so they can search the web for current information.</p>
+    <h1>Set Up <span>LiteLLM</span> with<br>CC Switch</h1>
+    <p>A complete guide to install CC Switch, create a LiteLLM API key, and route Claude, Codex, and other AI coding tools through the FeedMob LiteLLM service.</p>
   </div>
 </header>
 
 <nav class="top-bar">
   <div class="container">
     <a href="#addresses">Two Addresses</a>
-    <a href="#account">Create Account</a>
-    <a href="#kilo">Kilo</a>
-    <a href="#codex">Codex CLI</a>
-    <a href="#claude">Claude Code</a>
+    <a href="#install">Install</a>
+    <a href="#account">API Key</a>
+    <a href="#ccswitch">CC Switch</a>
+    <a href="#mapping">Model Mapping</a>
+    <a href="#routing">Routing</a>
     <a href="#verify">Verify</a>
     <a href="#faq">FAQ</a>
   </div>
@@ -367,7 +370,7 @@
               <td><code>https://litellm.feedmob.ai</code></td>
             </tr>
             <tr>
-              <td><span class="addr-pill">2</span> The “service address” you enter into each AI tool</td>
+              <td><span class="addr-pill">2</span> The service address you enter into CC Switch</td>
               <td><code>https://litellm-api.feedmob.ai</code></td>
             </tr>
           </tbody>
@@ -375,39 +378,59 @@
       </div>
       <div class="warn-box">
         <div>Create your account and key on address <b>1</b>; but the service address you enter
-        into the AI tools must always be address <b>2</b>. If you mistakenly use address 1, the AI
-        tool will still chat but won't be able to search the web.</div>
+        into CC Switch must always be address <b>2</b>. If you mistakenly use address 1, the desktop
+        tool may open normally but routing through LiteLLM will not work correctly.</div>
       </div>
     </div>
   </section>
 
-  <!-- Step 1: account -->
-  <section class="section" id="account">
+  <!-- Step 1: install -->
+  <section class="section" id="install">
     <div class="step-header">
       <div class="step-number">1</div>
-      <h2>Create a LiteLLM Account and Get Your Key</h2>
+      <h2>Install CC Switch</h2>
     </div>
     <div class="card">
-      <h3>Ask an administrator to invite you</h3>
-      <p>Your account must be created via an invitation from the administrator, <strong>Rao</strong>.
-      Please contact her and let her know you need a LiteLLM account. You will then receive an invitation email.</p>
-
-      <h3 class="spaced">Open the link in the email and register</h3>
-      <p>Find the invitation email in your inbox, click the registration link inside, and fill in the
-      requested information to complete sign-up.</p>
+      <p>Download and install CC Switch from the official site:</p>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-dots"><i></i><i></i><i></i></div>
+          <span>Download URL</span>
+          <button class="copy-btn" onclick="copyCode(this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            Copy
+          </button>
+        </div>
+        <pre><code>https://ccswitch.io/en/</code></pre>
+      </div>
 
       <div class="screenshot">
-        <div class="placeholder">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-          <span>Screenshot placeholder — invitation email / registration page</span>
-        </div>
-        <div class="screenshot-caption">Invitation email with the registration link</div>
+        <img src="assets/ccswitch-home.png" alt="CC Switch download page">
+        <div class="screenshot-caption">CC Switch website - download the app for your operating system</div>
       </div>
+
+      <div class="info-box">
+        <div>After installation, launch CC Switch once so the app can create its local configuration
+        files and routing service.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Step 2: account -->
+  <section class="section" id="account">
+    <div class="step-header">
+      <div class="step-number">2</div>
+      <h2>Create a LiteLLM API Key</h2>
+    </div>
+    <div class="card">
+      <h3>Get access instructions from the team</h3>
+      <p>Please reach out to <strong>Rao</strong> or the Dev team to obtain the LiteLLM login
+      credentials and access instructions.</p>
 
       <h3 class="spaced">Log in and create a key</h3>
       <ol class="steps-list">
         <li>Open the portal in your browser: <code class="inline">https://litellm.feedmob.ai</code></li>
-        <li>Log in with the account you just registered.</li>
+        <li>Log in with the credentials provided by the team.</li>
         <li>Find the <strong>Virtual Keys</strong> page in the menu.</li>
         <li>Click the <strong>Create New Key</strong> button.</li>
         <li>In <strong>Key Name</strong>, enter a name you'll recognize, e.g. <code class="inline">my-key</code>. Leave the other options at their defaults.</li>
@@ -415,11 +438,13 @@
       </ol>
 
       <div class="screenshot">
-        <div class="placeholder">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-          <span>Screenshot placeholder — Virtual Keys → Create New Key</span>
-        </div>
-        <div class="screenshot-caption">Virtual Keys page — creating a new key</div>
+        <img src="assets/litellm-virtual-keys.png" alt="LiteLLM Virtual Keys page">
+        <div class="screenshot-caption">LiteLLM portal - open Virtual Keys and click Create New Key</div>
+      </div>
+
+      <div class="screenshot">
+        <img src="assets/litellm-create-key.png" alt="LiteLLM Create New Key dialog">
+        <div class="screenshot-caption">Create a key name and click Create Key</div>
       </div>
 
       <div class="info-box">
@@ -430,164 +455,113 @@
     </div>
   </section>
 
-  <!-- Step 2 intro -->
-  <section class="section">
+  <!-- Step 3: CC Switch provider -->
+  <section class="section" id="ccswitch">
     <div class="step-header">
-      <div class="step-number">2</div>
-      <h2>Connect Your AI Tools</h2>
+      <div class="step-number">3</div>
+      <h2>Add the LiteLLM Provider in CC Switch</h2>
     </div>
     <div class="card">
-      <p>Below are the setup instructions for three common tools. You only need to configure the one
-      you actually use — you don't have to do all three. The model name is always
-      <code class="inline">minimax/minimax-m3</code>.</p>
-    </div>
-  </section>
+      <p>Open CC Switch, select the platform you want to use, and add a new configuration. You can
+      configure only the platform you actually use, such as Claude Code, Claude Desktop, Codex,
+      Gemini, OpenCode, OpenClaw, or Hermes.</p>
 
-  <!-- Kilo -->
-  <section class="section" id="kilo">
-    <div class="section-title">A · Kilo <span style="font-size:0.7em;color:var(--fm-muted);font-weight:400;">(VSCode extension)</span></div>
-    <div class="card">
-      <p>Kilo is an AI assistant inside VSCode. We recommend adding the service through its graphical
-      interface first, then adjusting settings as needed.</p>
+      <div class="screenshot">
+        <img src="assets/ccswitch-add-platform.png" alt="CC Switch platform selector and add button">
+        <div class="screenshot-caption">CC Switch - select a platform and click the plus button to add a configuration</div>
+      </div>
 
-      <h3 class="spaced">Part 1 — Add a custom provider in the Kilo UI</h3>
-      <ul class="bullets">
-        <li>Open Kilo settings and choose to add a custom provider.</li>
-        <li>In the <strong>API Key</strong> field, paste your <code class="ph">sk-xxxxxxxx</code> key.</li>
-        <li>In the <strong>service address (base URL)</strong> field, enter the value below:</li>
-      </ul>
+      <h3 class="spaced">Configure provider details</h3>
+      <ol class="steps-list">
+        <li>Enter a recognizable <strong>Provider Name</strong>, e.g. <code class="inline">FeedMob LiteLLM</code>.</li>
+        <li>Paste your <code class="ph">sk-xxxxxxxx</code> key into <strong>API Key</strong>.</li>
+        <li>Enter the service address below in <strong>API Endpoint</strong> or <strong>Base URL</strong>.</li>
+      </ol>
       <div class="code-block">
         <div class="code-header">
           <div class="code-dots"><i></i><i></i><i></i></div>
-          <span>Base URL</span>
+          <span>LiteLLM Service Address</span>
           <button class="copy-btn" onclick="copyCode(this)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
             Copy
           </button>
         </div>
-        <pre><code>https://litellm-api.feedmob.ai/v1</code></pre>
+        <pre><code>https://litellm-api.feedmob.ai</code></pre>
       </div>
 
       <div class="screenshot">
-        <div class="placeholder">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-          <span>Screenshot placeholder — Kilo custom provider dialog</span>
-        </div>
-        <div class="screenshot-caption">Kilo — adding a custom provider with API Key and base URL</div>
+        <img src="assets/ccswitch-provider.png" alt="CC Switch provider configuration page">
+        <div class="screenshot-caption">Provider configuration - name, API key, and LiteLLM service address</div>
       </div>
 
-      <h3 class="spaced">Part 2 (optional) — Add capabilities such as image recognition</h3>
-      <p>If you need options not available in the UI (such as image recognition), edit the config file
-      <code class="inline">~/.config/kilo/kilo.jsonc</code> using the example below:</p>
-      <div class="code-block">
-        <div class="code-header">
-          <div class="code-dots"><i></i><i></i><i></i></div>
-          <span>~/.config/kilo/kilo.jsonc</span>
-          <button class="copy-btn" onclick="copyCode(this)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-            Copy
-          </button>
-        </div>
-        <pre><code>{
-  "model": "litellm/minimax-m3",
-  "provider": {
-    "litellm": {
-      "name": "LiteLLM",
-      "npm": "@ai-sdk/openai",
-      "options": {
-        "baseURL": "https://litellm-api.feedmob.ai/v1",
-        "timeout": 300000
-      },
-      "models": {
-        "minimax-m3": {
-          "id": "minimax/minimax-m3",
-          "name": "MiniMax M3",
-          "tool_call": true,
-          "reasoning": true,
-          "attachment": true,
-          "modalities": { "input": ["text", "image"], "output": ["text"] }
-        }
-      }
-    }
-  }
-}</code></pre>
-      </div>
-      <div class="info-box">
-        <div>You do not need to enter the key again in the config file. As long as the provider name is
-        still <code class="inline">litellm</code> (matching what you added in the UI), Kilo will reuse the
-        key you entered there. Restart VSCode after editing for changes to take effect.</div>
+      <div class="warn-box">
+        <div>Use <code class="inline">https://litellm-api.feedmob.ai</code> here, not
+        <code class="inline">https://litellm.feedmob.ai</code>. Also avoid a trailing slash at the end of
+        the endpoint.</div>
       </div>
     </div>
   </section>
 
-  <!-- Codex -->
-  <section class="section" id="codex">
-    <div class="section-title">B · Codex CLI <span style="font-size:0.7em;color:var(--fm-muted);font-weight:400;">(command-line tool)</span></div>
+  <!-- Step 4: model mapping -->
+  <section class="section" id="mapping">
+    <div class="step-header">
+      <div class="step-number">4</div>
+      <h2>Configure Model Mapping</h2>
+    </div>
     <div class="card">
-      <p>Edit the config file <code class="inline">~/.codex/config.toml</code> and add the following:</p>
-      <div class="code-block">
-        <div class="code-header">
-          <div class="code-dots"><i></i><i></i><i></i></div>
-          <span>~/.codex/config.toml</span>
-          <button class="copy-btn" onclick="copyCode(this)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-            Copy
-          </button>
-        </div>
-        <pre><code>model = "minimax/minimax-m3"
-model_provider = "litellm"
+      <p>Open <strong>Model Mapping</strong>, fetch the model list, and map the platform roles to the
+      LiteLLM model. The model name is always <code class="inline">minimax/minimax-m3</code>.</p>
 
-[model_providers.litellm]
-name = "litellm"
-base_url = "https://litellm-api.feedmob.ai"
-wire_api = "responses"
-requires_openai_auth = true
-env_key = "LL_API_KEY"</code></pre>
-      </div>
-      <p>Then set your key as an environment variable (we recommend adding it to
-      <code class="inline">~/.bashrc</code> or <code class="inline">~/.zshrc</code> so it persists):</p>
       <div class="code-block">
         <div class="code-header">
           <div class="code-dots"><i></i><i></i><i></i></div>
-          <span>Environment variable</span>
+          <span>Model Mapping Values</span>
           <button class="copy-btn" onclick="copyCode(this)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
             Copy
           </button>
         </div>
-        <pre><code>export LL_API_KEY="sk-xxxxxxxx"</code></pre>
+        <pre><code>Sonnet: minimax/minimax-m3
+Opus:   minimax/minimax-m3
+Haiku:  minimax/minimax-m3</code></pre>
       </div>
+
+      <div class="screenshot">
+        <img src="assets/ccswitch-model-mapping.png" alt="CC Switch model mapping page">
+        <div class="screenshot-caption">Model Mapping - fetch models and map each role to minimax/minimax-m3</div>
+      </div>
+
       <div class="info-box">
-        <div>The service address here does not include <code class="inline">/v1</code> — Codex adds it
-        automatically. After setup, open a new terminal and run <code class="inline">codex</code>. If you
-        see a message like “Model metadata … not found / fallback metadata”, this is a known notice and
-        does not affect usage.</div>
+        <div>For Claude-family platforms, enable <strong>Needs model mapping</strong> when CC Switch
+        shows that option. It maps Claude's Sonnet, Opus, and Haiku roles to the actual LiteLLM model.</div>
       </div>
     </div>
   </section>
 
-  <!-- Claude Code -->
-  <section class="section" id="claude">
-    <div class="section-title">C · Claude Code CLI <span style="font-size:0.7em;color:var(--fm-muted);font-weight:400;">(command-line tool)</span></div>
+  <!-- Step 5: routing -->
+  <section class="section" id="routing">
+    <div class="step-header">
+      <div class="step-number">5</div>
+      <h2>Enable Routing if Needed</h2>
+    </div>
     <div class="card">
-      <p>Connect by setting three environment variables (again, we recommend adding them to
-      <code class="inline">~/.bashrc</code> or <code class="inline">~/.zshrc</code>):</p>
-      <div class="code-block">
-        <div class="code-header">
-          <div class="code-dots"><i></i><i></i><i></i></div>
-          <span>Environment variables</span>
-          <button class="copy-btn" onclick="copyCode(this)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-            Copy
-          </button>
-        </div>
-        <pre><code>export ANTHROPIC_BASE_URL="https://litellm-api.feedmob.ai"
-export ANTHROPIC_AUTH_TOKEN="sk-xxxxxxxx"
-export ANTHROPIC_MODEL="minimax/minimax-m3"</code></pre>
+      <p>If the configured app does not use LiteLLM after provider setup, enable routing in CC Switch.
+      Some versions show the routing switch on the main page; others require opening Settings first.</p>
+
+      <div class="screenshot">
+        <img src="assets/ccswitch-routing-main.png" alt="CC Switch routing switch on main page">
+        <div class="screenshot-caption">Main page - routing toggle and Settings button</div>
       </div>
+
+      <div class="screenshot">
+        <img src="assets/ccswitch-routing-settings.png" alt="CC Switch routing settings page">
+        <div class="screenshot-caption">Settings - Routing tab with local routing and master switch enabled</div>
+      </div>
+
       <div class="info-box">
-        <div>After setup, open a new terminal and run <code class="inline">claude</code>. Its web search
-        runs through the service address automatically.</div>
+        <div>Keep the CC Switch routing service running while you use the configured desktop app or
+        code editor. If the app still uses the old account, toggle routing off and on once, then restart
+        the target app.</div>
       </div>
     </div>
   </section>
@@ -595,11 +569,20 @@ export ANTHROPIC_MODEL="minimax/minimax-m3"</code></pre>
   <!-- Verify -->
   <section class="section" id="verify">
     <div class="step-header">
-      <div class="step-number">3</div>
+      <div class="step-number">6</div>
       <h2>Verify It Works</h2>
     </div>
     <div class="card">
-      <p>In whichever tool you configured, ask a question that needs current information, for example:</p>
+      <p>Open the corresponding desktop application or code editor. If the account or gateway
+      information is different from the account you previously logged in with directly, the connection
+      to LiteLLM has been established successfully.</p>
+
+      <div class="screenshot">
+        <img src="assets/ccswitch-verify-claude.png" alt="Claude app connected through CC Switch gateway">
+        <div class="screenshot-caption">Example verification - the target app is now connected through the CC Switch gateway</div>
+      </div>
+
+      <p>You can also send a short test message:</p>
       <div class="code-block">
         <div class="code-header">
           <div class="code-dots"><i></i><i></i><i></i></div>
@@ -609,13 +592,12 @@ export ANTHROPIC_MODEL="minimax/minimax-m3"</code></pre>
             Copy
           </button>
         </div>
-        <pre><code>Search for the latest international oil prices (Brent / WTI).</code></pre>
+        <pre><code>Hello. Which model are you using?</code></pre>
       </div>
       <ul class="bullets">
-        <li>If it returns recent information with source links, web search is working.</li>
-        <li>If it can't search, first check: whether the service address was set to address <strong>2</strong>
-        (not address 1), whether the key is correct, and whether the model name is
-        <code class="inline">minimax/minimax-m3</code>.</li>
+        <li>If the app responds through the configured provider, CC Switch routing is working.</li>
+        <li>If it still uses the original account or model, check the service address, API key, model mapping,
+        and routing switch first.</li>
       </ul>
     </div>
   </section>
@@ -626,8 +608,8 @@ export ANTHROPIC_MODEL="minimax/minimax-m3"</code></pre>
     <div class="card">
       <div class="faq-list">
         <div class="faq-item">
-          <div class="faq-question">Didn't receive the invitation email / can't register?</div>
-          <p>Contact the administrator, Rao, to resend the invitation.</p>
+          <div class="faq-question">How do I get LiteLLM credentials?</div>
+          <p>Contact Rao or the Dev team to obtain the LiteLLM login credentials and access instructions.</p>
         </div>
         <div class="faq-item">
           <div class="faq-question">Forgot or leaked your key?</div>
@@ -635,8 +617,14 @@ export ANTHROPIC_MODEL="minimax/minimax-m3"</code></pre>
           (<code class="inline">https://litellm.feedmob.ai</code>), create a new one, and disable the old one.</p>
         </div>
         <div class="faq-item">
-          <div class="faq-question">Can chat normally but can't search the web?</div>
-          <p>Almost always because the service address was set to address 1. Change it to address 2.</p>
+          <div class="faq-question">The target app still uses my old account. What should I check?</div>
+          <p>Make sure CC Switch routing is enabled, the target platform is selected, and the target app
+          has been restarted after the configuration change.</p>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">The provider connects but requests fail. What is the common mistake?</div>
+          <p>Check the endpoint first. CC Switch should use
+          <code class="inline">https://litellm-api.feedmob.ai</code>, not the LiteLLM web portal address.</p>
         </div>
       </div>
     </div>
@@ -647,7 +635,7 @@ export ANTHROPIC_MODEL="minimax/minimax-m3"</code></pre>
 <footer class="footer">
   <img class="footer-logo-img" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMiIgZGF0YS1uYW1lPSJMYXllciAyIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDg3Ljc3IDQxNC42OSI+CiAgPGRlZnM+CiAgICA8c3R5bGU+CiAgICAgIC5jbHMtMSB7CiAgICAgICAgZmlsbDogI2ZmZjsKICAgICAgfQoKICAgICAgLmNscy0yIHsKICAgICAgICBmaWxsOiAjMDBiNWFkOwogICAgICB9CiAgICA8L3N0eWxlPgogIDwvZGVmcz4KICA8ZyBpZD0iTGF5ZXJfMS0yIiBkYXRhLW5hbWU9IkxheWVyIDEiPgogICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMTI3LjYyLDczLjM0YzEwLjEzLDAsMTguMjMsOC4xMSwxOC4yMywxOC4yNHYxMy42N2MwLDEwLjEzLTguMTEsMTguMjMtMTguMjMsMTguMjNINTAuNjR2OTUuMjJoNTYuNzJjMTAuMTQsMCwxOC4yNCw4LjEsMTguMjQsMTguMjN2MTMuNjdjMCwxMC4xMi04LjEsMTguMjItMTguMjQsMTguMjJoLTU2LjcydjEyNy42NGMwLDEwLjExLTguNiwxOC4yMi0xOC4yMywxOC4yMmgtMTQuMThjLTEwLjEzLDAtMTguMjMtOC4xMS0xOC4yMy0xOC4yMlY5MS41OGMwLTEwLjEzLDguMS0xOC4yNCwxOC4yMy0xOC4yNGgxMDkuMzlaIi8+CiAgICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0zMTAuMTEsNzMuMzRjMTAuMTMsMCwxOC4yMyw4LjExLDE4LjIzLDE4LjI0djEzLjY3YzAsMTAuMTMtOC4xLDE4LjIzLTE4LjIzLDE4LjIzaC03Ny40OHY5NS4yMmg2My44MWMxMC4xMywwLDE4LjIzLDguMSwxOC4yMywxOC4yM3YxMy42N2MwLDEwLjEyLTguMSwxOC4yMi0xOC4yMywxOC4yMmgtNjMuODF2OTUuNzJoNzcuNDljMTAuMTIsMCwxOC4yMyw4LjEsMTguMjMsMTguMjN2MTMuNjhjMCwxMC4xMS04LjEsMTguMjItMTguMjMsMTguMjJoLTEwOS40MWMtMTAuMTIsMC0xOC4yMi04LjExLTE4LjIyLTE4LjIyVjkxLjU4YzAtMTAuMTMsOC4xLTE4LjI0LDE4LjIyLTE4LjI0aDEwOS40WiIvPgogICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNNDkyLjQzLDczLjM0YzEwLjEyLDAsMTguMjMsOC4xMSwxOC4yMywxOC4yNHYxMy42N2MwLDEwLjEzLTguMTEsMTguMjMtMTguMjMsMTguMjNoLTc3LjQ4djk1LjIyaDYzLjgxYzEwLjEzLDAsMTguMjQsOC4xLDE4LjI0LDE4LjIzdjEzLjY3YzAsMTAuMTItOC4xMSwxOC4yMi0xOC4yNCwxOC4yMmgtNjMuODF2OTUuNzJoNzcuNDhjMTAuMTIsMCwxOC4yMyw4LjEsMTguMjMsMTguMjN2MTMuNjhjMCwxMC4xMS04LjExLDE4LjIyLTE4LjIzLDE4LjIyaC0xMDkuMzljLTEwLjEyLDAtMTguMjMtOC4xMS0xOC4yMy0xOC4yMlY5MS41OGMwLTEwLjEzLDguMTEtMTguMjQsMTguMjMtMTguMjRoMTA5LjM5WiIvPgogICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNNTY2Ljg4LDQxNC42OWMtMTAuMTMsMC0xOC4yMy04LjExLTE4LjIzLTE4LjIzVjkxLjU4YzAtMTAuMTMsOC4xLTE4LjI0LDE4LjIzLTE4LjI0aDUxLjY1YzYwLjc3LDAsODkuMTQsMzQuNDUsODkuMTQsMTAwLjI4djE0MC44YzAsNjUuODQtMjguMzcsMTAwLjI3LTg5LjE0LDEwMC4yN2gtNTEuNjVaTTU5OC43OCwxMjMuNDd2MjQxLjA3aDE5Ljc2YzI2Ljg0LDAsMzcuOTktMTYuMjEsMzcuOTktNTAuMTR2LTE0MC43OWMwLTMzLjkzLTExLjE0LTUwLjEzLTM3Ljk5LTUwLjEzaC0xOS43NloiLz4KICAgIDxnPgogICAgICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik03NjcuMjYsNDEwLjhoLTE1LjM2Vjc3LjA3aDEzLjM3bDg1LjY2LDI5Ny41OCw4NS4xNy0yOTcuNThoMTMuODZ2MzMzLjczaC0xNS44NFYxNDAuNDVsLTc3LjI1LDI3MC4zNWgtMTEuODdsLTc3Ljc0LTI3MC4zNXYyNzAuMzVoMFoiLz4KICAgICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMTA2NS41Myw0MTAuOGMtNy45MSwwLTE2LjA5LTEuMTUtMjQuNTEtMy40Ni04LjQyLTIuMy0xNi4wOS02Ljc1LTIzLjAzLTEzLjM4LTYuOTQtNi41OS0xMi41NS0xNS41OS0xNi44My0yNi45OC00LjMxLTExLjM4LTYuNDUtMjYuMzItNi40NS00NC44MXYtMTU2Ljk2YzAtMjguMzksNS43OC01MC4xOCwxNy4zMy02NS4zNiwxMi4yMS0xNS4xOSwzMC4wMy0yMi43OCw1My40Ny0yMi43OHM0MS41OSw3LjU5LDUzLjQ4LDIyLjc4YzExLjg4LDE0Ljg2LDE3LjgzLDM2LjY0LDE3LjgzLDY1LjM2djE1Ni45NmMwLDE4LjQ5LTIuMTYsMzMuNDItNi40NSw0NC44MS00LjI5LDExLjM5LTkuOSwyMC4zOS0xNi44NCwyNi45OC02LjkzLDYuNjItMTQuNiwxMS4wOC0yMy4wMiwxMy4zOC04LjQxLDIuMzEtMTYuNzYsMy40Ni0yNS4wMSwzLjQ2Wk0xMDY1LjUzLDkyLjQxYy0xOC44MiwwLTMyLjUyLDUuNzktNDEuMDksMTcuMzMtOS41OCwxMi4yMi0xNC4zNiwzMC43LTE0LjM2LDU1LjQ2djE1Ni45NmMwLDI1LjA5LDQuNzgsNDMuNzUsMTQuMzYsNTUuOTUsOC45MSwxMS41NiwyMi42MSwxNy4zNCw0MS4wOSwxNy4zNHMzMi4wMi01Ljc4LDQxLjU5LTE3LjM0YzkuMjQtMTEuNTQsMTMuODYtMzAuMjEsMTMuODYtNTUuOTV2LTE1Ni45NmMwLTI1LjQyLTQuNjItNDMuOTEtMTMuODYtNTUuNDYtOS4yNC0xMS41NC0yMy4xMS0xNy4zMy00MS41OS0xNy4zM1oiLz4KICAgICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMTI3NC42OSwyNDMuOTRjNi45MywzLjMsMTMuMDQsOC4wOSwxOC4zMiwxNC4zNiwxMS41NSwxNC41MywxNy4zMiwzNi4zMSwxNy4zMiw2NS4zNnMtNS43Nyw1MC44NC0xNy4zMiw2NS4zNmMtMTIuMjEsMTQuNTItMzEuMDMsMjEuNzgtNTYuNDUsMjEuNzhoLTU0Ljk1Vjc3LjA3aDU0Ljk1YzI1LjQyLDAsNDQuMjQsNy4yNyw1Ni40NSwyMS43OCwxMS41NSwxNC41MywxNy4zMiwzNi4zMiwxNy4zMiw2NS4zNnMtNS43Nyw1MC4zNC0xNy4zMiw2NC44N2MtMi42NSwzLjMxLTUuNDYsNi4xMi04LjQyLDguNDItMi45NywyLjMxLTYuMjcsNC40NS05LjksNi40NFpNMTE5Ny40NCwyMzYuMDFoMzkuMTFjMjAuNDgsMCwzNS4xNi01LjYxLDQ0LjA4LTE2Ljg0LDkuMjMtMTEuMjIsMTMuODYtMjkuNTQsMTMuODYtNTQuOTZzLTQuNDUtNDQuMTQtMTMuMzYtNTUuMjFjLTguOTMtMTEuMDYtMjMuNzgtMTYuNTktNDQuNTctMTYuNTloLTM5LjExdjE0My42aDBaTTEyMzYuNTUsMzk1LjQ1YzIwLjc5LDAsMzUuNjUtNS41Myw0NC41Ny0xNi42LDguOTItMTEuMDQsMTMuMzYtMjkuNDYsMTMuMzYtNTUuMnMtNC42Mi00NC4yMi0xMy44Ni01NS40NWMtOC45MS0xMS4yMy0yMy42LTE2Ljg1LTQ0LjA2LTE2Ljg1aC0zOS4xM3YxNDQuMDloMzkuMTFaIi8+CiAgICA8L2c+CiAgICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik0xNDEwLjcxLDBjLTQyLjU2LDAtNzcuMDcsMzQuNS03Ny4wNyw3Ny4wNnMzNC41MSw3Ny4wNyw3Ny4wNyw3Ny4wNyw3Ny4wNi0zNC41MSw3Ny4wNi03Ny4wN1MxNDUzLjI3LDAsMTQxMC43MSwwWk0xNDU2Ljg2LDgwLjc2YzAsNS4xMy00LjEsOS4yMS04Ljk1LDkuMjFoLTI0LjN2MjQuMDNjMCw1LjEyLTQuMDgsOS4yMS05LjIsOS4yMWgtNy40MWMtNC44NiwwLTguOTUtNC4wOS04Ljk1LTkuMjF2LTI0LjAzaC0yNC4yOWMtNS4xLDAtOS4yLTQuMDgtOS4yLTkuMjF2LTcuNGMwLTQuODYsNC4xLTguOTUsOS4yLTguOTVoMjQuMjl2LTI0LjI4YzAtNS4xMyw0LjA5LTkuMjEsOC45NS05LjIxaDcuNDFjNS4xMiwwLDkuMiw0LjA4LDkuMiw5LjIxdjI0LjI4aDI0LjNjNC44NSwwLDguOTUsNC4wOSw4Ljk1LDguOTV2Ny40WiIvPgogICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMTQ1Ni44Niw3My4zNnY3LjRjMCw1LjEzLTQuMSw5LjIxLTguOTUsOS4yMWgtMjQuM3YyNC4wM2MwLDUuMTItNC4wOCw5LjIxLTkuMiw5LjIxaC03LjQxYy00Ljg2LDAtOC45NS00LjA5LTguOTUtOS4yMXYtMjQuMDNoLTI0LjI5Yy01LjEsMC05LjItNC4wOC05LjItOS4yMXYtNy40YzAtNC44Niw0LjEtOC45NSw5LjItOC45NWgyNC4yOXYtMjQuMjhjMC01LjEzLDQuMDktOS4yMSw4Ljk1LTkuMjFoNy40MWM1LjEyLDAsOS4yLDQuMDgsOS4yLDkuMjF2MjQuMjhoMjQuM2M0Ljg1LDAsOC45NSw0LjA5LDguOTUsOC45NVoiLz4KICA8L2c+Cjwvc3ZnPg==" alt="FeedMob">
   <div class="footer-divider"></div>
-  <p><strong>FeedMob</strong> &mdash; LiteLLM &amp; Web Search Setup Guide</p>
+  <p><strong>FeedMob</strong> &mdash; LiteLLM &amp; CC Switch Setup Guide</p>
 </footer>
 
 <script>
