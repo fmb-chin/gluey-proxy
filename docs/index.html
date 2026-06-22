@@ -267,6 +267,55 @@
     color: var(--fm-muted); text-align: center; border-top: 1px solid var(--fm-border); font-weight: 400;
   }
 
+  /* === Video player === */
+  .video-player {
+    position: relative; border-radius: var(--radius-lg); overflow: hidden;
+    margin: 22px 0; box-shadow: var(--shadow-md); border: 1px solid var(--fm-border);
+  }
+  .video-poster {
+    position: relative; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 18px;
+    width: 100%; aspect-ratio: 16 / 9; border: 0; padding: 0; cursor: pointer;
+    background: linear-gradient(160deg, var(--fm-deep) 0%, var(--fm-navy) 55%, var(--fm-teal-dark) 100%);
+    color: #fff; overflow: hidden; font-family: inherit;
+  }
+  .video-poster-glow {
+    position: absolute; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(circle at 78% 18%, rgba(0,181,173,0.30) 0%, transparent 55%),
+      radial-gradient(circle at 18% 88%, rgba(27,155,194,0.24) 0%, transparent 55%);
+  }
+  .video-play {
+    position: relative; z-index: 1;
+    width: 76px; height: 76px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--fm-teal); color: #fff;
+    box-shadow: 0 10px 30px rgba(0,181,173,0.45);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .video-play svg { width: 30px; height: 30px; margin-left: 4px; }
+  .video-poster:hover .video-play,
+  .video-poster:focus-visible .video-play {
+    transform: scale(1.06);
+    box-shadow: 0 12px 36px rgba(0,181,173,0.6);
+  }
+  .video-poster:focus-visible { outline: 3px solid rgba(0,181,173,0.6); outline-offset: -3px; }
+  .video-poster-meta {
+    position: relative; z-index: 1; display: flex; flex-direction: column;
+    align-items: center; gap: 6px; text-align: center; padding: 0 24px;
+  }
+  .video-poster-eyebrow {
+    font-size: 11px; font-weight: 700; letter-spacing: 1.4px;
+    text-transform: uppercase; color: var(--fm-teal);
+  }
+  .video-poster-text {
+    font-size: 1rem; font-weight: 300; color: rgba(255,255,255,0.85); line-height: 1.5;
+    max-width: 460px;
+  }
+  .video-embed {
+    display: block; width: 100%; background: #000; border: 0;
+  }
+
   /* === Steps list === */
   .steps-list { list-style: none; counter-reset: step; }
   .steps-list li {
@@ -393,6 +442,7 @@
 
 <nav class="top-bar">
   <div class="container">
+    <a href="#overview">Walkthrough</a>
     <a href="#addresses">Two Addresses</a>
     <a href="#install">Install</a>
     <a href="#account">API Key</a>
@@ -405,6 +455,23 @@
 </nav>
 
 <div class="container">
+
+  <!-- Overview video -->
+  <section class="section" id="overview">
+    <div class="section-title">Video Walkthrough</div>
+    <div class="video-player" id="videoPlayer">
+      <button class="video-poster" id="videoPoster" type="button" aria-label="Play the setup walkthrough video">
+        <span class="video-poster-glow"></span>
+        <span class="video-play">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+        </span>
+        <span class="video-poster-meta">
+          <span class="video-poster-eyebrow">Tap to play</span>
+          <span class="video-poster-text">A narrated walkthrough of the full LiteLLM &amp; CC Switch setup.</span>
+        </span>
+      </button>
+    </div>
+  </section>
 
   <!-- Intro / Two addresses -->
   <section class="section" id="addresses">
@@ -767,6 +834,26 @@
     try { document.execCommand('copy'); done(); } catch (e) {}
     document.body.removeChild(ta);
   }
+
+  // Video player: swap the poster for a real <video> pointing at the S3 source on click.
+  (function () {
+    var poster = document.getElementById('videoPoster');
+    var player = document.getElementById('videoPlayer');
+    if (!poster || !player) return;
+    poster.addEventListener('click', function () {
+      var video = document.createElement('video');
+      video.className = 'video-embed';
+      video.setAttribute('controls', '');
+      video.setAttribute('autoplay', '');
+      video.setAttribute('playsinline', '');
+      video.setAttribute('preload', 'auto');
+      video.src = 'https://feedmob-cdn.s3.us-east-1.amazonaws.com/litellm-guide/LiteLLM.mp4';
+      player.innerHTML = '';
+      player.appendChild(video);
+      var p = video.play();
+      if (p && typeof p.catch === 'function') p.catch(function () {});
+    });
+  })();
 
   window.addEventListener('scroll', function () {
     var scrollTop = window.scrollY;
