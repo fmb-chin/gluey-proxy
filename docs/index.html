@@ -436,7 +436,7 @@
     </div>
     <div class="badge">Quick Setup Guide</div>
     <h1>Set Up <span>LiteLLM</span> with<br>CC Switch</h1>
-    <p>Install CC Switch for macOS, import the preconfigured FeedMob setup, then enable routing for Claude Desktop and other supported tools.</p>
+    <p>Install CC Switch for macOS, import the preconfigured Claude Desktop provider, then enable routing and verify the setup.</p>
   </div>
 </header>
 
@@ -444,7 +444,6 @@
   <div class="container">
     <a href="#download">Download</a>
     <a href="#import">Import</a>
-    <a href="#enable">Enable</a>
     <a href="#routing">Routing</a>
     <a href="#verify">Verify</a>
     <a href="#faq">FAQ</a>
@@ -471,7 +470,7 @@
         <li>Launch CC Switch once after installation.</li>
       </ol>
       <div class="info-box">
-        <div>The FeedMob LiteLLM API key is already prepared in the shared CC Switch import data, so you do not need to create a LiteLLM account or key yourself.</div>
+        <div>The FeedMob LiteLLM API key is already prepared in the shared Claude Desktop provider import data, so you do not need to create a LiteLLM account or key yourself.</div>
       </div>
     </div>
   </section>
@@ -479,15 +478,16 @@
   <section class="section" id="import">
     <div class="step-header">
       <div class="step-number">2</div>
-      <h2>Import the FeedMob CC Switch Data</h2>
+      <h2>Import the Claude Desktop Provider</h2>
     </div>
     <div class="card">
-      <p>Ask <strong>Rao</strong> for the prepared CC Switch SQL import file, then import it into CC Switch by following the screenshots below.</p>
+      <p>Ask <strong>Rao</strong> for the prepared CC Switch SQL import file. The SQL only contains the FeedMob Claude Desktop provider configuration.</p>
       <ol class="steps-list">
         <li>Get the prepared <code class="inline">.sql</code> file from Rao.</li>
         <li>Open CC Switch and go to the data import area shown in the screenshots.</li>
         <li>Select the SQL file from Rao and complete the import.</li>
         <li>Restart CC Switch after the import finishes.</li>
+        <li>Confirm the imported provider is the FeedMob Claude Desktop provider.</li>
       </ol>
 
       <div class="screenshot">
@@ -508,43 +508,22 @@
       </div>
       <div class="screenshot">
         <img src="assets/ccswitch-import-5.png" alt="CC Switch SQL import step 5">
-        <div class="screenshot-caption">Import step 5 - verify the FeedMob configuration is present after import</div>
+        <div class="screenshot-caption">Import step 5 - verify the FeedMob Claude Desktop provider is present after import</div>
       </div>
 
       <div class="warn-box">
-        <div>Do not manually edit the imported API key or endpoint unless the Dev team asks you to. The SQL file already contains the FeedMob LiteLLM provider configuration.</div>
+        <div>Do not manually edit the imported API key or endpoint unless the Dev team asks you to. The SQL file already contains the FeedMob Claude Desktop provider configuration.</div>
       </div>
-    </div>
-  </section>
-
-  <section class="section" id="enable">
-    <div class="step-header">
-      <div class="step-number">3</div>
-      <h2>Enable the FeedMob Provider</h2>
-    </div>
-    <div class="card">
-      <p>Return to the CC Switch provider list, select the imported FeedMob LiteLLM provider, and click <strong>Enable</strong>.</p>
-
-      <div class="screenshot">
-        <img src="assets/ccswitch-enable-provider.png" alt="CC Switch provider list with Enable button">
-        <div class="screenshot-caption">Provider list - select the imported FeedMob provider and click Enable</div>
-      </div>
-
-      <ol class="steps-list">
-        <li>Confirm the imported FeedMob LiteLLM provider appears in the provider list.</li>
-        <li>Click <strong>Enable</strong> on that provider.</li>
-        <li>If CC Switch shows <strong>Requires routing</strong>, continue to the Routing step before testing.</li>
-      </ol>
     </div>
   </section>
 
   <section class="section" id="routing">
     <div class="step-header">
-      <div class="step-number">4</div>
+      <div class="step-number">3</div>
       <h2>Enable Routing for Claude Desktop</h2>
     </div>
     <div class="card">
-      <p>This step is required when CC Switch marks the provider as <strong>Requires routing</strong>, especially for Claude Desktop.</p>
+      <p>The imported SQL is for Claude Desktop, so enable routing before testing Claude Desktop.</p>
 
       <div class="screenshot">
         <img src="assets/ccswitch-routing-required.png" alt="CC Switch provider list showing Requires routing and routing toggle">
@@ -555,7 +534,6 @@
         <li>Turn on the routing switch at the top of CC Switch.</li>
         <li>If the top routing switch is not visible, click the <strong>Settings</strong> icon near the CC Switch title, open <strong>Routing</strong>, and enable the routing controls shown below.</li>
         <li>After changing routing, close and reopen <strong>Claude Desktop</strong> before testing again.</li>
-        <li>If you are configuring Claude Code instead and it already works after clicking <strong>Enable</strong>, you can skip this Routing step.</li>
       </ul>
 
       <div class="screenshot">
@@ -567,15 +545,15 @@
 
   <section class="section" id="verify">
     <div class="step-header">
-      <div class="step-number">5</div>
+      <div class="step-number">4</div>
       <h2>Verify It Works</h2>
     </div>
     <div class="card">
-      <p>Open the corresponding desktop application or code editor. If it uses the imported FeedMob provider, the CC Switch setup is working.</p>
+      <p>Open Claude Desktop. If it uses the imported FeedMob provider, the CC Switch setup is working.</p>
 
       <div class="screenshot">
         <img src="assets/ccswitch-verify-claude.png" alt="Claude app connected through CC Switch gateway">
-        <div class="screenshot-caption">Example verification - the target app is now connected through the CC Switch gateway</div>
+        <div class="screenshot-caption">Example verification - Claude Desktop is now connected through the CC Switch gateway</div>
       </div>
 
       <p>You can send a short test message:</p>
@@ -592,8 +570,8 @@
       </div>
 
       <ul class="bullets">
-        <li>If the app responds through the imported provider, CC Switch routing is working.</li>
-        <li>If it still uses the original account or model, check whether the provider is enabled, routing is turned on, and the target app has been restarted.</li>
+        <li>If Claude Desktop responds through the imported provider, CC Switch routing is working.</li>
+        <li>If it still uses the original account or model, check whether routing is turned on and Claude Desktop has been restarted.</li>
       </ul>
     </div>
   </section>
@@ -608,15 +586,15 @@
         </div>
         <div class="faq-item">
           <div class="faq-question">Do I need to create a LiteLLM account or API key?</div>
-          <p>No. The shared SQL import already includes the prepared FeedMob LiteLLM provider configuration.</p>
+          <p>No. The shared SQL import already includes the prepared FeedMob Claude Desktop provider configuration.</p>
         </div>
         <div class="faq-item">
           <div class="faq-question">Where is the old manual setup guide?</div>
           <p>The original guide is still available at <a href="manual-setup.html">manual-setup.html</a>.</p>
         </div>
         <div class="faq-item">
-          <div class="faq-question">The target app still uses my old account. What should I check?</div>
-          <p>Make sure the imported FeedMob provider is enabled, CC Switch routing is enabled when required, and the target app has been restarted after the configuration change.</p>
+          <div class="faq-question">Claude Desktop still uses my old account. What should I check?</div>
+          <p>Make sure CC Switch routing is enabled and Claude Desktop has been restarted after the import.</p>
         </div>
       </div>
     </div>
